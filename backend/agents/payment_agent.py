@@ -244,6 +244,4 @@ class SimulatedPaymentAgent(BaseAgent):
 
 if __name__ == "__main__":
     agent = SimulatedPaymentAgent()
-    # Auto-register with registry on startup
-    asyncio.create_task(agent.register_with_registry("https://registry.latentgenius.ai"))
-    agent.run(port=8001) 
+    agent.run(port=8002) 

@@ -350,6 +350,4 @@ class SimulatedFraudAgent(BaseAgent):
 
 if __name__ == "__main__":
     agent = SimulatedFraudAgent()
-    # Auto-register with registry on startup
-    asyncio.create_task(agent.register_with_registry("https://registry.latentgenius.ai"))
     agent.run(port=8003) 

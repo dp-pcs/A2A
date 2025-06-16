@@ -1,0 +1,235 @@
+version: '3.8'
+
+services:
+  # Agent Registry Service
+  registry:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.registry
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@db:5432/a2a_registry
+      - REDIS_URL=redis://redis:6379
+      - LOG_LEVEL=INFO
+    depends_on:
+      - db
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Customer Service Orchestrator
+  orchestrator:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.orchestrator
+    ports:
+      - "8001:8001"
+    environment:
+      - REGISTRY_URL=http://registry:8000
+      - DATABASE_URL=postgresql://postgres:password@db:5432/a2a_orchestrator
+      - REDIS_URL=redis://redis:6379
+      - LOG_LEVEL=INFO
+    depends_on:
+      - registry
+      - db
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Payment Systems Agent
+  payment-agent:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.agent
+    ports:
+      - "8002:8002"
+    environment:
+      - AGENT_TYPE=payment
+      - AGENT_PORT=8002
+      - REGISTRY_URL=http://registry:8000
+      - DATABASE_URL=postgresql://postgres:password@db:5432/a2a_payment
+      - REDIS_URL=redis://redis:6379
+      - LOG_LEVEL=INFO
+    depends_on:
+      - registry
+      - db
+      - redis
+    command: python -m backend.agents.payment_agent
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Fraud Detection Agent
+  fraud-agent:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.agent
+    ports:
+      - "8003:8003"
+    environment:
+      - AGENT_TYPE=fraud
+      - AGENT_PORT=8003
+      - REGISTRY_URL=http://registry:8000
+      - DATABASE_URL=postgresql://postgres:password@db:5432/a2a_fraud
+      - REDIS_URL=redis://redis:6379
+      - LOG_LEVEL=INFO
+    depends_on:
+      - registry
+      - db
+      - redis
+    command: python -m backend.agents.fraud_agent
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Order Management Agent
+  order-agent:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.agent
+    ports:
+      - "8004:8004"
+    environment:
+      - AGENT_TYPE=order
+      - AGENT_PORT=8004
+      - REGISTRY_URL=http://registry:8000
+      - DATABASE_URL=postgresql://postgres:password@db:5432/a2a_order
+      - REDIS_URL=redis://redis:6379
+      - LOG_LEVEL=INFO
+    depends_on:
+      - registry
+      - db
+      - redis
+    command: python -m backend.agents.order_agent
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Tech Support Agent
+  tech-agent:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.agent
+    ports:
+      - "8005:8005"
+    environment:
+      - AGENT_TYPE=tech
+      - AGENT_PORT=8005
+      - REGISTRY_URL=http://registry:8000
+      - DATABASE_URL=postgresql://postgres:password@db:5432/a2a_tech
+      - REDIS_URL=redis://redis:6379
+      - LOG_LEVEL=INFO
+    depends_on:
+      - registry
+      - db
+      - redis
+    command: python -m backend.agents.tech_agent
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # API Gateway (nginx reverse proxy)
+  gateway:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - registry
+      - orchestrator
+      - payment-agent
+      - fraud-agent
+      - order-agent
+      - tech-agent
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=a2a_main
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis for session management and caching
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Prometheus for monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+
+  # Grafana for dashboards
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  default:
+    name: a2a-network 

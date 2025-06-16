@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LatentGenius A2A Customer Service Orchestration</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Header -->
+    <div class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <i class="fas fa-robot text-blue-600 text-2xl mr-3"></i>
+                    <h1 class="text-2xl font-bold text-gray-900">LatentGenius A2A Orchestration</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-500">Protocol Version: 1.0</span>
+                    <div class="flex items-center">
+                        <div class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+                        <span class="text-sm text-green-600">Live</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Incident Overview -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="bg-red-50 border border-red-200 rounded-lg p-6 mb-6" id="incident-panel">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-triangle text-red-600 text-xl mr-3"></i>
+                    <h2 class="text-xl font-semibold text-red-800">Critical Incident: Payment Processing Failure</h2>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium" id="incident-status">CRITICAL</span>
+                    <span class="text-sm text-red-600" id="incident-timer">00:00:00</span>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <p class="text-sm text-gray-600">Customer</p>
+                    <p class="font-semibold text-gray-900">GlobalCorp Industries</p>
+                    <p class="text-sm text-gray-500">Enterprise Tier</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Order Value</p>
+                    <p class="font-semibold text-gray-900">$49,999.99</p>
+                    <p class="text-sm text-gray-500">AI Compute Cluster</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Failure Type</p>
+                    <p class="font-semibold text-gray-900">Gateway Timeout</p>
+                    <p class="text-sm text-gray-500">3DS Verification Delay</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Resolution Deadline</p>
+                    <p class="font-semibold text-gray-900" id="deadline-timer">30:00 remaining</p>
+                    <p class="text-sm text-gray-500">Before inventory expires</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Agent Communication Network Overlay -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Agent Communication Network</h3>
+            <div class="relative h-64" id="agent-network">
+                <!-- Network visualization will be rendered here -->
+                <svg width="100%" height="100%" viewBox="0 0 800 250">
+                    <!-- Central Orchestrator -->
+                    <g id="orchestrator" class="agent-node">
+                        <circle cx="400" cy="125" r="30" fill="#3B82F6" stroke="#1E40AF" stroke-width="2"/>
+                        <text x="400" y="130" text-anchor="middle" fill="white" font-size="10" font-weight="bold">ORCH</text>
+                        <text x="400" y="155" text-anchor="middle" fill="#374151" font-size="12">Orchestrator</text>
+                    </g>
+                    
+                    <!-- Payment Agent -->
+                    <g id="payment-agent" class="agent-node">
+                        <circle cx="200" cy="60" r="25" fill="#EF4444" stroke="#DC2626" stroke-width="2"/>
+                        <text x="200" y="65" text-anchor="middle" fill="white" font-size="9">PAY</text>
+                        <text x="200" y="90" text-anchor="middle" fill="#374151" font-size="11">Payment</text>
+                    </g>
+                    
+                    <!-- Fraud Agent -->
+                    <g id="fraud-agent" class="agent-node">
+                        <circle cx="600" cy="60" r="25" fill="#10B981" stroke="#059669" stroke-width="2"/>
+                        <text x="600" y="65" text-anchor="middle" fill="white" font-size="9">FRD</text>
+                        <text x="600" y="90" text-anchor="middle" fill="#374151" font-size="11">Fraud</text>
+                    </g>
+                    
+                    <!-- Order Agent -->
+                    <g id="order-agent" class="agent-node">
+                        <circle cx="200" cy="190" r="25" fill="#8B5CF6" stroke="#7C3AED" stroke-width="2"/>
+                        <text x="200" y="195" text-anchor="middle" fill="white" font-size="9">ORD</text>
+                        <text x="200" y="220" text-anchor="middle" fill="#374151" font-size="11">Order</text>
+                    </g>
+                    
+                    <!-- Tech Support Agent -->
+                    <g id="tech-agent" class="agent-node">
+                        <circle cx="600" cy="190" r="25" fill="#F59E0B" stroke="#D97706" stroke-width="2"/>
+                        <text x="600" y="195" text-anchor="middle" fill="white" font-size="9">TCH</text>
+                        <text x="600" y="220" text-anchor="middle" fill="#374151" font-size="11">Tech</text>
+                    </g>
+                    
+                    <!-- Communication Lines -->
+                    <g id="communication-lines" opacity="0.6">
+                        <!-- Orchestrator to all agents -->
+                        <line x1="400" y1="125" x2="200" y2="60" stroke="#3B82F6" stroke-width="2" stroke-dasharray="5,5" class="comm-line" id="line-orch-payment"/>
+                        <line x1="400" y1="125" x2="600" y2="60" stroke="#3B82F6" stroke-width="2" stroke-dasharray="5,5" class="comm-line" id="line-orch-fraud"/>
+                        <line x1="400" y1="125" x2="200" y2="190" stroke="#3B82F6" stroke-width="2" stroke-dasharray="5,5" class="comm-line" id="line-orch-order"/>
+                        <line x1="400" y1="125" x2="600" y2="190" stroke="#3B82F6" stroke-width="2" stroke-dasharray="5,5" class="comm-line" id="line-orch-tech"/>
+                        
+                        <!-- Inter-agent communication -->
+                        <line x1="200" y1="60" x2="600" y2="60" stroke="#6B7280" stroke-width="1" stroke-dasharray="2,2" class="comm-line" id="line-payment-fraud" opacity="0.3"/>
+                        <line x1="200" y1="190" x2="600" y2="190" stroke="#6B7280" stroke-width="1" stroke-dasharray="2,2" class="comm-line" id="line-order-tech" opacity="0.3"/>
+                    </g>
+                    
+                    <!-- Message bubbles (will be animated) -->
+                    <g id="message-bubbles"></g>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Agent Discovery & Coordination -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <!-- Agent Cards -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Agent Coordination</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Payment Systems Agent -->
+                        <div class="border rounded-lg p-4 agent-card" data-agent="payment">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center">
+                                    <i class="fas fa-credit-card text-blue-600 mr-2"></i>
+                                    <h4 class="font-semibold text-gray-900">Payment Systems</h4>
+                                </div>
+                                <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs status-badge">Idle</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-2">Transaction analysis & retry logic</p>
+                            <div class="flex items-center justify-between">
+                                <div class="w-full bg-gray-200 rounded-full h-2 mr-2">
+                                    <div class="bg-blue-600 h-2 rounded-full progress-bar" style="width: 0%"></div>
+                                </div>
+                                <span class="text-sm font-medium text-gray-700 progress-text">0%</span>
+                            </div>
+                        </div>
+
+                        <!-- Fraud Detection Agent -->
+                        <div class="border rounded-lg p-4 agent-card" data-agent="fraud">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center">
+                                    <i class="fas fa-shield-alt text-green-600 mr-2"></i>
+                                    <h4 class="font-semibold text-gray-900">Fraud Detection</h4>
+                                </div>
+                                <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs status-badge">Idle</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-2">Risk assessment & verification</p>
+                            <div class="flex items-center justify-between">
+                                <div class="w-full bg-gray-200 rounded-full h-2 mr-2">
+                                    <div class="bg-green-600 h-2 rounded-full progress-bar" style="width: 0%"></div>
+                                </div>
+                                <span class="text-sm font-medium text-gray-700 progress-text">0%</span>
+                            </div>
+                        </div>
+
+                        <!-- Order Management Agent -->
+                        <div class="border rounded-lg p-4 agent-card" data-agent="order">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center">
+                                    <i class="fas fa-box text-purple-600 mr-2"></i>
+                                    <h4 class="font-semibold text-gray-900">Order Management</h4>
+                                </div>
+                                <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs status-badge">Idle</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-2">Inventory hold & expedited shipping</p>
+                            <div class="flex items-center justify-between">
+                                <div class="w-full bg-gray-200 rounded-full h-2 mr-2">
+                                    <div class="bg-purple-600 h-2 rounded-full progress-bar" style="width: 0%"></div>
+                                </div>
+                                <span class="text-sm font-medium text-gray-700 progress-text">0%</span>
+                            </div>
+                        </div>
+
+                        <!-- Tech Support Agent -->
+                        <div class="border rounded-lg p-4 agent-card" data-agent="tech">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center">
+                                    <i class="fas fa-tools text-orange-600 mr-2"></i>
+                                    <h4 class="font-semibold text-gray-900">Tech Support</h4>
+                                </div>
+                                <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs status-badge">Idle</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-2">System diagnostics & optimization</p>
+                            <div class="flex items-center justify-between">
+                                <div class="w-full bg-gray-200 rounded-full h-2 mr-2">
+                                    <div class="bg-orange-600 h-2 rounded-full progress-bar" style="width: 0%"></div>
+                                </div>
+                                <span class="text-sm font-medium text-gray-700 progress-text">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resolution Progress -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Resolution Progress</h3>
+                <div class="mb-4">
+                    <canvas id="progressChart" style="height: 200px;"></canvas>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Time Elapsed</span>
+                        <span class="font-medium text-gray-900" id="elapsed-time">0:00</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Agents Active</span>
+                        <span class="font-medium text-gray-900" id="active-agents">0</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Tasks Created</span>
+                        <span class="font-medium text-gray-900" id="tasks-created">0</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Artifacts Generated</span>
+                        <span class="font-medium text-gray-900" id="artifacts-count">0</span>
+                    </div>
+                </div>
+                
+                <!-- Demo Controls -->
+                <div class="mt-6 pt-4 border-t">
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Scenario</label>
+                        <select id="scenario-select" class="w-full border border-gray-300 rounded px-3 py-2 text-sm">
+                            <option value="payment_failure">Payment Gateway Timeout</option>
+                            <option value="fraud_investigation">Fraud Investigation</option>
+                        </select>
+                    </div>
+                    <button id="start-demo-btn" class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
+                        Start A2A Demo
+                    </button>
+                    <button id="reset-demo-btn" class="w-full mt-2 bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition-colors" style="display: none;">
+                        Reset Demo
+                    </button>
+                    <div id="demo-status" class="mt-2 text-center text-sm text-gray-600">Ready to start</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scenario Information -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6" id="scenario-info" style="display: none;">
+            <!-- Scenario details will be populated by demo controller -->
+        </div>
+
+        <!-- Real-time Activity Feed -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Activity Stream -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Real-time Activity Stream</h3>
+                <div class="space-y-3 max-h-96 overflow-y-auto" id="activity-feed">
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-play-circle text-4xl mb-2"></i>
+                        <p>Click "Start A2A Demo" to begin agent orchestration</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Generated Artifacts -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Generated Artifacts</h3>
+                <div class="space-y-3" id="artifacts-list">
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-file-alt text-4xl mb-2"></i>
+                        <p>Artifacts will appear here as agents complete their tasks</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resolution Summary -->
+        <div class="bg-white rounded-lg shadow p-6 mt-6" id="resolution-summary" style="display: none;">
+            <!-- Resolution details will be populated by demo controller -->
+        </div>
+
+        <!-- Error Display -->
+        <div class="bg-red-50 border border-red-200 rounded-lg p-6 mt-6" id="error-display" style="display: none;">
+            <!-- Error messages will be populated by demo controller -->
+        </div>
+    </div>
+
+    <script src="js/dashboard.js"></script>
+    <script src="js/demo.js"></script>
+    <script>
+        // Initialize demo controller when page loads
+        let demoController;
+        let dashboard;
+        
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Initialize dashboard
+            dashboard = new A2ADashboard();
+            await dashboard.initialize();
+            
+            // Initialize demo controller
+            demoController = new A2ADemoController();
+            
+            // Set up demo controls
+            const startBtn = document.getElementById('start-demo-btn');
+            const resetBtn = document.getElementById('reset-demo-btn');
+            const scenarioSelect = document.getElementById('scenario-select');
+            const statusDiv = document.getElementById('demo-status');
+            
+            startBtn.addEventListener('click', async function() {
+                const scenario = scenarioSelect.value;
+                statusDiv.textContent = 'Starting demo...';
+                startBtn.style.display = 'none';
+                resetBtn.style.display = 'block';
+                
+                // Show scenario info
+                document.getElementById('scenario-info').style.display = 'block';
+                
+                try {
+                    await demoController.startDemo(scenario);
+                    statusDiv.textContent = 'Demo completed';
+                } catch (error) {
+                    statusDiv.textContent = 'Demo failed';
+                    console.error('Demo error:', error);
+                }
+            });
+            
+            resetBtn.addEventListener('click', function() {
+                demoController.stopDemo();
+                dashboard.reset();
+                
+                // Hide scenario and resolution info
+                document.getElementById('scenario-info').style.display = 'none';
+                document.getElementById('resolution-summary').style.display = 'none';
+                document.getElementById('error-display').style.display = 'none';
+                
+                startBtn.style.display = 'block';
+                resetBtn.style.display = 'none';
+                statusDiv.textContent = 'Ready to start';
+            });
+        });
+    </script>
+</body>
+</html> 

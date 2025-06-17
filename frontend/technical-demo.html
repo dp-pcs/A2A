@@ -1,0 +1,1427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A2A Technical Demo - HTTP Protocol Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            background: #0a0e1a;
+            color: #e0e6ed;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .demo-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .demo-panel {
+            flex: 1;
+            padding: 20px;
+            border-right: 2px solid #1e293b;
+            overflow-y: auto;
+        }
+
+        .technical-panel {
+            flex: 1;
+            background: #0f172a;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .panel-header {
+            background: #1e293b;
+            padding: 15px;
+            margin: -20px -20px 20px -20px;
+            border-bottom: 2px solid #334155;
+        }
+
+        .panel-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #f1f5f9;
+        }
+
+        .scenario-selector {
+            background: #1e293b;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .scenario-card {
+            background: #334155;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid #64748b;
+        }
+
+        .scenario-card:hover {
+            background: #475569;
+            border-left-color: #3b82f6;
+        }
+
+        .scenario-card.selected {
+            background: #1e40af;
+            border-left-color: #60a5fa;
+        }
+
+        .scenario-title {
+            font-weight: bold;
+            color: #f1f5f9;
+            margin-bottom: 5px;
+        }
+
+        .scenario-details {
+            font-size: 12px;
+            color: #cbd5e1;
+        }
+
+        .demo-controls {
+            background: #1e293b;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            transition: background 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #2563eb;
+        }
+
+        .btn:disabled {
+            background: #64748b;
+            cursor: not-allowed;
+        }
+
+        .status-display {
+            background: #1e293b;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .status-item {
+            margin-bottom: 10px;
+            padding: 8px;
+            background: #334155;
+            border-radius: 4px;
+        }
+
+        .status-label {
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        .status-value {
+            color: #f1f5f9;
+            font-weight: bold;
+        }
+
+        .http-log {
+            background: #020617;
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'Monaco', monospace;
+            font-size: 11px;
+            height: calc(100vh - 120px);
+            overflow-y: auto;
+        }
+
+        .http-request {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #1e293b;
+            border-radius: 6px;
+            border-left: 4px solid #10b981;
+        }
+
+        .http-response {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #1e293b;
+            border-radius: 6px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .http-error {
+            border-left-color: #ef4444 !important;
+        }
+
+        .request-line {
+            color: #10b981;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .response-line {
+            color: #3b82f6;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .headers {
+            color: #94a3b8;
+            margin-bottom: 10px;
+        }
+
+        .body {
+            color: #e0e6ed;
+            background: #0f172a;
+            padding: 10px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .timestamp {
+            color: #64748b;
+            font-size: 10px;
+        }
+
+        .agent-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .agent-orchestrator { background: #7c3aed; color: white; }
+        .agent-payment { background: #059669; color: white; }
+        .agent-fraud { background: #dc2626; color: white; }
+        .agent-tech { background: #2563eb; color: white; }
+
+        .protocol-phase {
+            color: #fbbf24;
+            font-size: 10px;
+            font-weight: bold;
+            margin: 4px 0;
+            padding: 2px 6px;
+            background: rgba(251, 191, 36, 0.1);
+            border-radius: 3px;
+            border-left: 2px solid #fbbf24;
+        }
+
+        .explanation {
+            color: #34d399;
+            font-size: 11px;
+            margin: 4px 0;
+            padding: 3px 8px;
+            background: rgba(52, 211, 153, 0.1);
+            border-radius: 3px;
+            border-left: 2px solid #34d399;
+            font-style: italic;
+        }
+
+        .control-btn {
+            background: #475569;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .control-btn:hover {
+            background: #64748b;
+        }
+
+        .control-btn:disabled {
+            background: #334155;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .traffic-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #1e293b;
+            border-radius: 6px;
+            font-size: 11px;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-group label {
+            color: #94a3b8;
+            font-weight: bold;
+        }
+
+        .control-group select {
+            background: #334155;
+            color: #e0e6ed;
+            border: 1px solid #475569;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 11px;
+        }
+
+        .tutorial-highlight {
+            border: 2px solid #fbbf24 !important;
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
+            animation: tutorialPulse 1s ease-in-out;
+        }
+
+        @keyframes tutorialPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .tutorial-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #fbbf24;
+            color: #1e293b;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            max-width: 300px;
+        }
+
+        .floating-next-step {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #fbbf24;
+            color: #1e293b;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+            transition: all 0.3s ease;
+            animation: tutorialPulse 2s ease-in-out infinite;
+        }
+
+        .floating-next-step:hover {
+            background: #f59e0b;
+            transform: scale(1.05);
+        }
+
+        .floating-next-step:disabled {
+            background: #64748b;
+            color: #94a3b8;
+            cursor: not-allowed;
+            animation: none;
+            transform: none;
+        }
+
+        .metrics {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            font-size: 11px;
+        }
+
+        .metric {
+            background: #334155;
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+
+        .metric-label {
+            color: #94a3b8;
+            display: block;
+        }
+
+        .metric-value {
+            color: #f1f5f9;
+            font-weight: bold;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <!-- Demo Panel -->
+        <div class="demo-panel">
+            <div class="panel-header">
+                <div class="panel-title">🎭 A2A Protocol Technical Demo</div>
+            </div>
+
+            <div style="background: #1e293b; border-radius: 8px; padding: 15px; margin-bottom: 20px; font-size: 11px;">
+                <div style="color: #fbbf24; font-weight: bold; margin-bottom: 8px;">📚 A2A Protocol Components:</div>
+                <div style="color: #cbd5e1;">
+                    📋 <strong>Agent Cards</strong> - Digital business cards (.well-known/agent.json)<br>
+                    🎯 <strong>Task Objects</strong> - Discrete work units with lifecycle states<br>
+                    ⚡ <strong>JSON-RPC 2.0</strong> - Message exchange with typed parts<br>
+                    📦 <strong>Artifact Generation</strong> - Structured task outputs<br>
+                    🌊 <strong>Streaming (SSE)</strong> - Real-time task updates
+                </div>
+            </div>
+
+            <div style="background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 12px; margin-bottom: 20px; font-size: 10px;">
+                <div style="color: #60a5fa; font-weight: bold; margin-bottom: 6px;">ℹ️ Demo Flow:</div>
+                <div style="color: #94a3b8;">
+                    <strong>Phase 1:</strong> Agent Discovery & Card retrieval (simulated to avoid CORS)<br>
+                    <strong>Phase 2:</strong> Task Object creation (real HTTP call)<br>
+                    <strong>Phase 3:</strong> JSON-RPC agent calls (real A2A traffic via SSE stream)
+                </div>
+            </div>
+
+            <div class="scenario-selector">
+                <h3>📋 Select Test Scenario</h3>
+                <div id="scenarios"></div>
+            </div>
+
+            <div class="demo-controls">
+                <h3>🎮 Demo Controls</h3>
+                <button class="btn" id="startDemo" disabled>Start A2A Demo</button>
+                <button class="btn" id="resetDemo">Reset</button>
+                <button class="btn" id="clearLogs">Clear HTTP Logs</button>
+            </div>
+
+            <div class="status-display">
+                <h3>📊 Demo Status</h3>
+                <div class="status-item">
+                    <div class="status-label">Current Scenario</div>
+                    <div class="status-value" id="currentScenario">None selected</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">Task Object ID</div>
+                    <div class="status-value" id="incidentId">-</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">Status</div>
+                    <div class="status-value" id="demoStatus">Ready</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">Agents Active</div>
+                    <div class="status-value" id="agentsActive">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technical Panel -->
+        <div class="technical-panel">
+            <div class="panel-header">
+                <div class="panel-title">🔧 Live HTTP Traffic</div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="control-btn" id="pauseBtn" onclick="togglePause()" disabled>⏸️ Pause</button>
+                    <button class="control-btn" onclick="clearHttpLog()">Clear</button>
+                </div>
+            </div>
+
+            <div class="traffic-controls">
+                <div class="control-group">
+                    <label>Speed:</label>
+                    <select id="speedControl" onchange="changeSpeed()">
+                        <option value="tutorial">📚 Tutorial (Step-by-step)</option>
+                        <option value="slow">🐢 Slow</option>
+                        <option value="normal" selected>⚡ Normal</option>
+                        <option value="fast">🚀 Fast</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <button class="control-btn" id="nextStepBtn" onclick="nextStep()" disabled style="display: none;">👉 Next Step</button>
+                    <span id="tutorialIndicator" style="display: none; color: #fbbf24; font-size: 11px; font-style: italic;">Tutorial mode active - use floating button to advance</span>
+                </div>
+            </div>
+
+            <div class="metrics">
+                <div class="metric">
+                    <span class="metric-label">Requests</span>
+                    <span class="metric-value" id="requestCount">0</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Success</span>
+                    <span class="metric-value" id="successCount">0</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Errors</span>
+                    <span class="metric-value" id="errorCount">0</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Avg Latency</span>
+                    <span class="metric-value" id="avgLatency">0ms</span>
+                </div>
+            </div>
+
+            <div class="http-log" id="httpLog">
+                <div style="text-align: center; color: #64748b; margin-top: 50px;">
+                    Waiting for A2A Protocol traffic...<br>
+                    <small>Start a demo to see Agent Discovery, Task Objects, and JSON-RPC 2.0 messages</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Next Step Button for Tutorial Mode -->
+    <button class="floating-next-step" id="floatingNextStep" onclick="nextStep()" style="display: none;">
+        👉 Next Step
+    </button>
+
+    <script>
+        class TechnicalA2ADemo {
+            constructor() {
+                this.selectedScenario = null;
+                this.currentIncident = null;
+                this.orchestratorUrl = 'http://localhost:8001';
+                this.requestCount = 0;
+                this.successCount = 0;
+                this.errorCount = 0;
+                this.latencies = [];
+                
+                // Traffic control settings
+                this.isPaused = false;
+                this.speed = 'normal';
+                this.tutorialMode = false;
+                this.pendingSteps = [];
+                this.currentTutorialStep = 0;
+                
+                this.init();
+            }
+
+            async init() {
+                await this.loadScenarios();
+                this.setupEventListeners();
+                this.renderScenarios();
+            }
+
+            async loadScenarios() {
+                try {
+                    const response = await fetch('/demo_scenarios.json');
+                    this.scenarios = (await response.json()).scenarios;
+                } catch (error) {
+                    console.error('Failed to load scenarios:', error);
+                    this.scenarios = [
+                        {
+                            id: 'test_scenario',
+                            name: 'Test Payment Failure',
+                            description: 'Simple test scenario',
+                            incident_data: {
+                                incident_type: 'payment_failure',
+                                customer: { name: 'Test Corp', tier: 'enterprise' },
+                                order: { amount: 10000 },
+                                failure_details: { error_code: 'TEST_ERROR' }
+                            }
+                        }
+                    ];
+                }
+            }
+
+            renderScenarios() {
+                const container = document.getElementById('scenarios');
+                container.innerHTML = this.scenarios.map(scenario => `
+                    <div class="scenario-card" data-scenario="${scenario.id}">
+                        <div class="scenario-title">${scenario.name}</div>
+                        <div class="scenario-details">
+                            ${scenario.description}<br>
+                            Amount: $${scenario.incident_data?.order?.amount?.toLocaleString() || 'N/A'}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            setupEventListeners() {
+                document.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('scenario-card')) {
+                        this.selectScenario(e.target.dataset.scenario);
+                    }
+                });
+
+                document.getElementById('startDemo').addEventListener('click', () => this.startDemo());
+                document.getElementById('resetDemo').addEventListener('click', () => this.resetDemo());
+                document.getElementById('clearLogs').addEventListener('click', () => this.clearHttpLog());
+            }
+
+            selectScenario(scenarioId) {
+                this.selectedScenario = scenarioId;
+                const scenario = this.scenarios.find(s => s.id === scenarioId);
+                
+                // Update UI
+                document.querySelectorAll('.scenario-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                document.querySelector(`[data-scenario="${scenarioId}"]`).classList.add('selected');
+                
+                document.getElementById('currentScenario').textContent = scenario.name;
+                document.getElementById('startDemo').disabled = false;
+            }
+
+            async startDemo() {
+                if (!this.selectedScenario) return;
+                
+                const scenario = this.scenarios.find(s => s.id === this.selectedScenario);
+                document.getElementById('demoStatus').textContent = 'Starting...';
+                
+                // Enable traffic controls
+                document.getElementById('pauseBtn').disabled = false;
+                
+                try {
+                    // Start monitoring A2A traffic before we begin
+                    this.startTrafficMonitoring();
+                    
+                    // Phase 1: Show registry discovery (this happens inside orchestrator)
+                    document.getElementById('demoStatus').textContent = 'Agent Discovery...';
+                    await this.simulateAgentDiscovery();
+                    
+                    // Phase 2: Create incident
+                    document.getElementById('demoStatus').textContent = 'Creating Task Object...';
+                    const startTime = Date.now();
+                    await this.logHttpRequest('POST', `${this.orchestratorUrl}/incidents`, scenario.incident_data);
+                    
+                    const response = await fetch(`${this.orchestratorUrl}/incidents`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(scenario.incident_data)
+                    });
+                    
+                    const latency = Date.now() - startTime;
+                    const result = await response.json();
+                    
+                    await this.logHttpResponse(response.status, result, latency);
+                    this.updateMetrics(latency, response.ok);
+                    
+                    if (response.ok) {
+                        this.currentIncident = result.incident_id;
+                        document.getElementById('incidentId').textContent = this.currentIncident;
+                        document.getElementById('demoStatus').textContent = 'JSON-RPC Message Exchange...';
+                        
+                        // Wait a bit to show the orchestration in progress
+                        setTimeout(() => {
+                            document.getElementById('demoStatus').textContent = 'A2A protocol complete';
+                        }, 3000);
+                    } else {
+                        document.getElementById('demoStatus').textContent = 'Failed';
+                    }
+                    
+                } catch (error) {
+                    console.error('Demo error:', error);
+                    const errorResponse = {
+                        error: error.message || 'Unknown error occurred',
+                        type: 'network_error',
+                        details: error.toString()
+                    };
+                    await this.logHttpResponse(0, errorResponse, 0);
+                    document.getElementById('demoStatus').textContent = 'Error';
+                }
+            }
+
+            async simulateAgentDiscovery() {
+                // Note: Real agent discovery happens inside orchestrator - we just show what it would look like
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                const discoveryStart = Date.now();
+                await this.logHttpRequest('GET', 'http://localhost:8000/.well-known/agents', {});
+                
+                try {
+                    const response = await fetch('http://localhost:8000/.well-known/agents');
+                    const latency = Date.now() - discoveryStart;
+                    const result = await response.json();
+                    
+                    await this.logHttpResponse(response.status, result, latency);
+                    this.updateMetrics(latency, response.ok);
+                    
+                    // Simulate what the orchestrator does internally (Agent Card fetches) - NO ACTUAL FETCH
+                    if (result.agents && result.agents.length > 0) {
+                        for (let i = 0; i < Math.min(3, result.agents.length); i++) {
+                            const agentUrl = result.agents[i];
+                            
+                            const agentStart = Date.now();
+                            // Log as simulated request to avoid CORS confusion
+                            await this.logHttpRequest('GET', `${agentUrl} (simulated)`, {});
+                            
+                            // Simulate successful Agent Card retrieval without actual fetch (to avoid CORS)
+                            await new Promise(resolve => setTimeout(resolve, 100));
+                            const agentLatency = Date.now() - agentStart;
+                            
+                            // Show what a typical Agent Card looks like (fully simulated)
+                            const mockAgentCard = this.getMockAgentCard(agentUrl);
+                            await this.logHttpResponse(200, mockAgentCard, agentLatency);
+                            this.updateMetrics(agentLatency, true);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Agent discovery error:', error);
+                    const errorResponse = {
+                        error: error.message || 'Agent discovery failed',
+                        type: 'discovery_error',
+                        details: error.toString()
+                    };
+                    await this.logHttpResponse(0, errorResponse, 0);
+                }
+            }
+
+            getMockAgentCard(agentUrl) {
+                if (agentUrl.includes('8002')) {
+                    return {
+                        agent_id: "payment-sys-001",
+                        name: "Payment Systems Agent",
+                        description: "Handles payment processing and transaction analysis",
+                        skills: [
+                            { name: "transaction-analysis", description: "Analyze payment failures and transactions" },
+                            { name: "payment-retry", description: "Manage payment retry strategies" }
+                        ],
+                        endpoints: { base_url: "http://localhost:8002" },
+                        capabilities: ["real-time-processing", "fraud-detection"]
+                    };
+                } else if (agentUrl.includes('8003')) {
+                    return {
+                        agent_id: "fraud-detect-001", 
+                        name: "Fraud Detection Agent",
+                        description: "Assesses transaction risk and fraud patterns",
+                        skills: [
+                            { name: "risk-assessment", description: "Evaluate transaction risk factors" },
+                            { name: "pattern-analysis", description: "Detect suspicious patterns" }
+                        ],
+                        endpoints: { base_url: "http://localhost:8003" },
+                        capabilities: ["ml-detection", "real-time-scoring"]
+                    };
+                } else if (agentUrl.includes('8004')) {
+                    return {
+                        agent_id: "order-mgmt-001",
+                        name: "Order Management Agent",
+                        description: "Manages inventory holds and order processing",
+                        skills: [
+                            { name: "inventory-hold", description: "Secure inventory for pending orders" },
+                            { name: "order-processing", description: "Process and manage customer orders" }
+                        ],
+                        endpoints: { base_url: "http://localhost:8004" },
+                        capabilities: ["inventory-management", "order-tracking"]
+                    };
+                } else if (agentUrl.includes('8005')) {
+                    return {
+                        agent_id: "tech-support-001",
+                        name: "Technical Support Agent", 
+                        description: "Provides system diagnostics and technical analysis",
+                        skills: [
+                            { name: "system-diagnostics", description: "Diagnose technical issues" },
+                            { name: "performance-analysis", description: "Analyze system performance" }
+                        ],
+                        endpoints: { base_url: "http://localhost:8005" },
+                        capabilities: ["log-analysis", "performance-monitoring"]
+                    };
+                }
+                return { agent_id: "unknown", name: "Unknown Agent", skills: [] };
+            }
+
+            startTrafficMonitoring() {
+                // Monitor the orchestrator's traffic stream
+                const eventSource = new EventSource(`${this.orchestratorUrl}/traffic/stream`);
+                
+                eventSource.addEventListener('a2a_traffic', (event) => {
+                    const message = JSON.parse(event.data);
+                    this.logA2AMessage(message);
+                });
+                
+                eventSource.onerror = () => {
+                    console.log('Traffic stream connection lost');
+                };
+
+                // Also simulate SSE task completion events to show the full A2A lifecycle
+                this.simulateTaskCompletionEvents();
+            }
+
+            async logA2AMessage(message) {
+                const log = document.getElementById('httpLog');
+                const timestamp = new Date().toLocaleTimeString();
+                const agentBadge = this.getAgentBadge(message.source_agent);
+                
+                // Don't trigger tutorial steps for A2A traffic - just log directly
+                if (message.message_type === 'request') {
+                    await this.logHttpRequestDirect(
+                        message.method,
+                        `http://localhost:${this.getAgentPort(message.target_agent)}/tasks`,
+                        message.content
+                    );
+                } else if (message.message_type === 'response') {
+                    await this.logHttpResponseDirect(
+                        message.status_code || 200,
+                        message.content,
+                        message.latency_ms || 0
+                    );
+                }
+                
+                // Update agent activity
+                this.updateAgentActivity();
+            }
+
+            async logHttpRequestDirect(method, url, body) {
+                // Direct logging without tutorial interference
+                const log = document.getElementById('httpLog');
+                const timestamp = new Date().toLocaleTimeString();
+                
+                const protocolPhase = this.getProtocolPhase(url);
+                const agentBadge = this.getAgentBadge(url);
+                const explanation = this.getRequestExplanation(method, url);
+                
+                const bodyContent = Object.keys(body).length === 0 ? 
+                    '<span style="color: #64748b; font-style: italic;">(empty - normal for GET requests)</span>' :
+                    JSON.stringify(body, null, 2);
+                
+                const requestElement = document.createElement('div');
+                requestElement.className = 'http-request';
+                
+                requestElement.innerHTML = `
+                    <div class="request-line">${agentBadge} → ${method} ${url}</div>
+                    <div class="protocol-phase">${protocolPhase}</div>
+                    <div class="explanation">${explanation}</div>
+                    <div class="timestamp">${timestamp}</div>
+                    <div class="headers">Content-Type: application/json</div>
+                    <div class="body">${bodyContent}</div>
+                `;
+                
+                log.appendChild(requestElement);
+                log.scrollTop = log.scrollHeight;
+                
+                this.requestCount++;
+                this.updateDisplayMetrics();
+            }
+
+            async logHttpResponseDirect(status, body, latency) {
+                // Direct logging without tutorial interference
+                const log = document.getElementById('httpLog');
+                const timestamp = new Date().toLocaleTimeString();
+                const isError = status >= 400;
+                const responseExplanation = this.getResponseExplanation(body);
+                
+                const responseElement = document.createElement('div');
+                responseElement.className = `http-response ${isError ? 'http-error' : ''}`;
+                
+                let bodyContent;
+                try {
+                    if (body === null || body === undefined) {
+                        bodyContent = '<span style="color: #64748b; font-style: italic;">(null)</span>';
+                    } else if (typeof body === 'string') {
+                        bodyContent = body;
+                    } else if (typeof body === 'object') {
+                        bodyContent = JSON.stringify(body, null, 2);
+                    } else {
+                        bodyContent = String(body);
+                    }
+                } catch (error) {
+                    bodyContent = '<span style="color: #ef4444;">[Error serializing response body]</span>';
+                }
+                
+                responseElement.innerHTML = `
+                    <div class="response-line">← HTTP ${status} (${latency}ms)</div>
+                    <div class="explanation">${responseExplanation}</div>
+                    <div class="timestamp">${timestamp}</div>
+                    <div class="headers">Content-Type: application/json</div>
+                    <div class="body">${bodyContent}</div>
+                `;
+                
+                log.appendChild(responseElement);
+                log.scrollTop = log.scrollHeight;
+                
+                if (status < 400) this.successCount++;
+                else this.errorCount++;
+                this.latencies.push(latency);
+                this.updateDisplayMetrics();
+            }
+
+            updateDisplayMetrics() {
+                const avgLatency = this.latencies.length > 0 ? 
+                    this.latencies.reduce((a, b) => a + b, 0) / this.latencies.length : 0;
+                
+                document.getElementById('requestCount').textContent = this.requestCount;
+                document.getElementById('successCount').textContent = this.successCount;
+                document.getElementById('errorCount').textContent = this.errorCount;
+                document.getElementById('avgLatency').textContent = Math.round(avgLatency) + 'ms';
+            }
+
+            showTutorialNotification(title, description) {
+                // Remove existing notification
+                const existing = document.querySelector('.tutorial-notification');
+                if (existing) existing.remove();
+                
+                // Create new notification with unique ID to prevent conflicts
+                const notification = document.createElement('div');
+                notification.className = 'tutorial-notification';
+                notification.id = 'current-tutorial-notification';
+                notification.innerHTML = `
+                    <div style="margin-bottom: 8px; font-size: 14px;">${title}</div>
+                    <div style="font-size: 11px; font-weight: normal; opacity: 0.9;">${description}</div>
+                    <div style="margin-top: 10px; font-size: 10px; opacity: 0.7;">
+                        Click the floating "Next Step" button to continue...
+                    </div>
+                `;
+                
+                document.body.appendChild(notification);
+                console.log('Updated tutorial notification:', title);
+            }
+
+            getAgentName(url) {
+                if (url.includes('8000')) return 'Registry';
+                if (url.includes('8001')) return 'Orchestrator';
+                if (url.includes('8002')) return 'Payment Agent';
+                if (url.includes('8003')) return 'Fraud Agent';
+                if (url.includes('8004')) return 'Order Agent';
+                if (url.includes('8005')) return 'Tech Agent';
+                return 'Unknown Agent';
+            }
+
+            togglePause() {
+                this.isPaused = !this.isPaused;
+                const btn = document.getElementById('pauseBtn');
+                btn.textContent = this.isPaused ? '▶️ Resume' : '⏸️ Pause';
+            }
+
+            changeSpeed() {
+                const speedControl = document.getElementById('speedControl');
+                this.speed = speedControl.value;
+                this.tutorialMode = (this.speed === 'tutorial');
+                
+                const nextStepBtn = document.getElementById('nextStepBtn');
+                const floatingNextStep = document.getElementById('floatingNextStep');
+                const tutorialIndicator = document.getElementById('tutorialIndicator');
+                
+                if (this.tutorialMode) {
+                    nextStepBtn.style.display = 'none';
+                    tutorialIndicator.style.display = 'block';
+                    // Floating button will be shown when tutorial steps start
+                } else {
+                    nextStepBtn.style.display = 'none';
+                    floatingNextStep.style.display = 'none';
+                    tutorialIndicator.style.display = 'none';
+                    // Remove tutorial notification if switching away from tutorial mode
+                    const notification = document.querySelector('.tutorial-notification');
+                    if (notification) notification.remove();
+                }
+            }
+
+            nextStep() {
+                console.log('Next step clicked, pending steps:', this.pendingSteps.length);
+                
+                if (this.pendingSteps.length > 0) {
+                    const resolve = this.pendingSteps.shift();
+                    resolve();
+                    
+                    console.log('Resolved step, remaining:', this.pendingSteps.length);
+                    
+                    // Only hide button and show completion if NO more steps are pending
+                    if (this.pendingSteps.length === 0) {
+                        console.log('All steps complete, disabling button');
+                        document.getElementById('floatingNextStep').disabled = true;
+                        
+                        // Remove tutorial notification
+                        const notification = document.querySelector('.tutorial-notification');
+                        if (notification) notification.remove();
+                        
+                        // Show completion message in tutorial mode after a delay
+                        if (this.tutorialMode) {
+                            setTimeout(() => {
+                                // Double-check no new steps were added
+                                if (this.pendingSteps.length === 0) {
+                                    document.getElementById('floatingNextStep').style.display = 'none';
+                                    this.showCompletionNotification();
+                                }
+                            }, 1000); // Increased delay to ensure all steps are processed
+                        }
+                    } else {
+                        // Re-enable button for next step
+                        document.getElementById('floatingNextStep').disabled = false;
+                    }
+                } else {
+                    console.log('No pending steps to resolve');
+                }
+            }
+
+            showCompletionNotification() {
+                const notification = document.createElement('div');
+                notification.className = 'tutorial-notification';
+                notification.innerHTML = `
+                    <div style="margin-bottom: 8px; font-size: 14px;">🎉 A2A Protocol Tutorial Complete!</div>
+                    <div style="font-size: 11px; font-weight: normal; opacity: 0.9;">
+                        You've seen the full A2A protocol flow: Agent Discovery → Agent Cards → Task Objects → JSON-RPC Message Exchange
+                    </div>
+                    <div style="margin-top: 10px; font-size: 10px; opacity: 0.7;">Switch to a different speed to see real-time agent coordination</div>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                // Auto-remove after 5 seconds
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, 5000);
+            }
+
+            getProtocolPhase(url) {
+                if (url.includes('/.well-known/agents')) {
+                    return '🔍 A2A Protocol: Agent Discovery';
+                } else if (url.includes('/.well-known/agent.json')) {
+                    return '📋 A2A Protocol: Agent Card Retrieval';
+                } else if (url.includes('/incidents')) {
+                    return '🎯 A2A Protocol: Task Object Creation';
+                } else if (url.includes('/tasks')) {
+                    return '⚡ A2A Protocol: JSON-RPC 2.0 Message Exchange';
+                } else if (url.includes('/discover')) {
+                    return '🔍 A2A Protocol: Agent Discovery';
+                } else {
+                    return '📡 A2A Protocol: Message Exchange';
+                }
+            }
+
+            getAgentBadge(url) {
+                if (url.includes('8000')) {
+                    return '<span class="agent-badge" style="background: #7c3aed;">REGISTRY</span>';
+                } else if (url.includes('8001')) {
+                    return '<span class="agent-badge agent-orchestrator">ORCH</span>';
+                } else if (url.includes('8002')) {
+                    return '<span class="agent-badge agent-payment">PAY</span>';
+                } else if (url.includes('8003')) {
+                    return '<span class="agent-badge agent-fraud">FRAUD</span>';
+                } else if (url.includes('8004')) {
+                    return '<span class="agent-badge" style="background: #059669;">ORDER</span>';
+                } else if (url.includes('8005')) {
+                    return '<span class="agent-badge agent-tech">TECH</span>';
+                } else {
+                    return '<span class="agent-badge">A2A</span>';
+                }
+            }
+
+            getRequestExplanation(method, url) {
+                if (url.includes('/.well-known/agents')) {
+                    return '💡 Registry discovery: Locating available agents in the network';
+                } else if (url.includes('/.well-known/agent.json')) {
+                    if (url.includes('(simulated)')) {
+                        return '💡 Agent Card retrieval: Simulated fetch of digital business card (avoiding CORS in demo)';
+                    }
+                    return '💡 Agent Card retrieval: Fetching digital business card with capabilities';
+                } else if (url.includes('/incidents')) {
+                    return '💡 Task Object creation: Defining discrete unit of work with lifecycle states';
+                } else if (url.includes('/tasks')) {
+                    return '💡 JSON-RPC 2.0 Message Exchange: Structured communication with typed parts';
+                } else {
+                    return '💡 A2A protocol message exchange';
+                }
+            }
+
+            getResponseExplanation(body) {
+                if (body && body.agents) {
+                    const count = body.agents.length;
+                    return `💡 Agent Discovery: Found ${count} agents with published Agent Cards`;
+                } else if (body && body.agent_id && body.skills) {
+                    const skillCount = body.skills.length;
+                    return `💡 Agent Card: Digital business card reveals ${skillCount} capabilities: ${body.skills.map(s => s.name).join(', ')} (simulated for demo)`;
+                } else if (body && body.incident_id) {
+                    return `💡 Task Object: Created with lifecycle state "submitted" - agents will now execute tasks via SSE`;
+                } else if (body && body.jsonrpc && body.result && body.result.task_id) {
+                    const status = body.result.status;
+                    if (status === 'created') {
+                        return `💡 JSON-RPC Task Creation: Agent accepted task "${body.result.task_id}" - execution starting via SSE`;
+                    } else if (status === 'working') {
+                        return `💡 JSON-RPC Task Progress: Agent is actively processing task`;
+                    } else if (status === 'completed') {
+                        return `💡 JSON-RPC Task Complete: Agent finished processing - artifacts ready`;
+                    } else {
+                        return `💡 JSON-RPC Task Status: ${status}`;
+                    }
+                } else if (body && body.result && body.result.analysis) {
+                    return `💡 Artifact Generation: Task completed, packaged results with ${(body.result.confidence * 100).toFixed(1)}% confidence`;
+                } else if (body && body.error === "Load failed") {
+                    return `💡 A2A Protocol: CORS restriction - browser blocking cross-origin Agent Card fetch (normal in demo)`;
+                } else if (body && body.jsonrpc && body.error) {
+                    // Handle JSON-RPC error responses
+                    const error = body.error;
+                    if (error.code === -32601) {
+                        const availableSkills = error.data?.available_skills || [];
+                        return `💡 JSON-RPC Error: Skill mismatch - Agent doesn't have requested skill. Available: [${availableSkills.join(', ')}]`;
+                    } else if (error.code === -32602) {
+                        return `💡 JSON-RPC Error: Invalid method parameters - ${error.message}`;
+                    } else if (error.code === -32603) {
+                        return `💡 JSON-RPC Error: Internal agent error - ${error.message}`;
+                    } else {
+                        return `💡 JSON-RPC Error (${error.code}): ${error.message}`;
+                    }
+                } else if (body && body.error) {
+                    // Fix object serialization
+                    const errorMsg = typeof body.error === 'object' ? 
+                        (body.error.message || JSON.stringify(body.error)) : 
+                        String(body.error);
+                    return `💡 A2A Protocol Error: ${errorMsg}`;
+                } else if (body && typeof body === 'object' && Object.keys(body).length === 0) {
+                    return '💡 A2A message exchange: Empty response';
+                } else {
+                    return '💡 A2A message: Response received';
+                }
+            }
+
+            getAgentPort(agentId) {
+                const ports = {
+                    'orchestrator-001': 8001,
+                    'payment-sys-001': 8002,
+                    'fraud-detect-001': 8003,
+                    'tech-support-001': 8005
+                };
+                return ports[agentId] || 8000;
+            }
+
+            updateMetrics(latency, success) {
+                this.requestCount++;
+                if (success) this.successCount++;
+                else this.errorCount++;
+                
+                this.latencies.push(latency);
+                this.updateDisplayMetrics();
+            }
+
+            updateAgentActivity() {
+                // Count unique agents that have been active
+                const activeAgents = new Set();
+                document.querySelectorAll('.agent-badge').forEach(badge => {
+                    activeAgents.add(badge.textContent);
+                });
+                document.getElementById('agentsActive').textContent = activeAgents.size;
+            }
+
+            clearHttpLog() {
+                document.getElementById('httpLog').innerHTML = `
+                    <div style="text-align: center; color: #64748b; margin-top: 50px;">
+                        A2A Protocol traffic log cleared<br>
+                        <small>Start a demo to see live Agent Discovery, Task Objects, and JSON-RPC 2.0 messages</small>
+                    </div>
+                `;
+            }
+
+            resetDemo() {
+                this.selectedScenario = null;
+                this.currentIncident = null;
+                
+                // Reset traffic control state
+                this.isPaused = false;
+                this.pendingSteps = [];
+                this.currentTutorialStep = 0;
+                
+                // Reset UI controls
+                document.getElementById('pauseBtn').disabled = true;
+                document.getElementById('pauseBtn').textContent = '⏸️ Pause';
+                document.getElementById('nextStepBtn').style.display = 'none';
+                document.getElementById('nextStepBtn').disabled = true;
+                document.getElementById('floatingNextStep').style.display = 'none';
+                document.getElementById('floatingNextStep').disabled = true;
+                document.getElementById('tutorialIndicator').style.display = 'none';
+                
+                // Remove tutorial notification
+                const notification = document.querySelector('.tutorial-notification');
+                if (notification) notification.remove();
+                
+                document.querySelectorAll('.scenario-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                
+                document.getElementById('currentScenario').textContent = 'None selected';
+                document.getElementById('incidentId').textContent = '-';
+                document.getElementById('demoStatus').textContent = 'Ready';
+                document.getElementById('agentsActive').textContent = '0';
+                document.getElementById('startDemo').disabled = true;
+                
+                this.clearHttpLog();
+            }
+
+            async logHttpRequest(method, url, body) {
+                if (this.tutorialMode) {
+                    await this.showTutorialStep(`Making ${method} request to ${this.getAgentName(url)}`, this.getRequestExplanation(method, url));
+                }
+                
+                const log = document.getElementById('httpLog');
+                const timestamp = new Date().toLocaleTimeString();
+                
+                const protocolPhase = this.getProtocolPhase(url);
+                const agentBadge = this.getAgentBadge(url);
+                const explanation = this.getRequestExplanation(method, url);
+                
+                const bodyContent = Object.keys(body).length === 0 ? 
+                    '<span style="color: #64748b; font-style: italic;">(empty - normal for GET requests)</span>' :
+                    JSON.stringify(body, null, 2);
+                
+                const requestElement = document.createElement('div');
+                requestElement.className = 'http-request';
+                if (this.tutorialMode) {
+                    requestElement.classList.add('tutorial-highlight');
+                }
+                
+                requestElement.innerHTML = `
+                    <div class="request-line">${agentBadge} → ${method} ${url}</div>
+                    <div class="protocol-phase">${protocolPhase}</div>
+                    <div class="explanation">${explanation}</div>
+                    <div class="timestamp">${timestamp}</div>
+                    <div class="headers">Content-Type: application/json</div>
+                    <div class="body">${bodyContent}</div>
+                `;
+                
+                log.appendChild(requestElement);
+                log.scrollTop = log.scrollHeight;
+                
+                await this.waitForSpeed();
+            }
+
+            async logHttpResponse(status, body, latency) {
+                if (this.tutorialMode) {
+                    await this.showTutorialStep(`Received HTTP ${status} response`, this.getResponseExplanation(body));
+                }
+                
+                const log = document.getElementById('httpLog');
+                const timestamp = new Date().toLocaleTimeString();
+                const isError = status >= 400;
+                const responseExplanation = this.getResponseExplanation(body);
+                
+                const responseElement = document.createElement('div');
+                responseElement.className = `http-response ${isError ? 'http-error' : ''}`;
+                if (this.tutorialMode) {
+                    responseElement.classList.add('tutorial-highlight');
+                }
+                
+                let bodyContent;
+                try {
+                    if (body === null || body === undefined) {
+                        bodyContent = '<span style="color: #64748b; font-style: italic;">(null)</span>';
+                    } else if (typeof body === 'string') {
+                        bodyContent = body;
+                    } else if (typeof body === 'object') {
+                        bodyContent = JSON.stringify(body, null, 2);
+                    } else {
+                        bodyContent = String(body);
+                    }
+                } catch (error) {
+                    bodyContent = '<span style="color: #ef4444;">[Error serializing response body]</span>';
+                }
+                
+                responseElement.innerHTML = `
+                    <div class="response-line">← HTTP ${status} (${latency}ms)</div>
+                    <div class="explanation">${responseExplanation}</div>
+                    <div class="timestamp">${timestamp}</div>
+                    <div class="headers">Content-Type: application/json</div>
+                    <div class="body">${bodyContent}</div>
+                `;
+                
+                log.appendChild(responseElement);
+                log.scrollTop = log.scrollHeight;
+                
+                await this.waitForSpeed();
+            }
+
+            async waitForSpeed() {
+                if (this.isPaused) {
+                    await this.waitForUnpause();
+                }
+                
+                let delay = 0;
+                switch (this.speed) {
+                    case 'tutorial': delay = 0; break; // Controlled by tutorial steps
+                    case 'slow': delay = 2000; break;
+                    case 'normal': delay = 500; break;
+                    case 'fast': delay = 100; break;
+                }
+                
+                if (delay > 0) {
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+
+            async waitForUnpause() {
+                while (this.isPaused) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+            }
+
+            async showTutorialStep(title, description) {
+                // Don't show notification if not in tutorial mode
+                if (!this.tutorialMode) return;
+                
+                this.showTutorialNotification(title, description);
+                
+                // Wait for user to click "Next Step"
+                return new Promise(resolve => {
+                    this.pendingSteps.push(resolve);
+                    const floatingBtn = document.getElementById('floatingNextStep');
+                    floatingBtn.style.display = 'block';
+                    floatingBtn.disabled = false;
+                    
+                    console.log('Added tutorial step, total pending:', this.pendingSteps.length);
+                });
+            }
+
+            async simulateTaskCompletionEvents() {
+                // Wait for task creation to complete first
+                await new Promise(resolve => setTimeout(resolve, 8000));
+                
+                if (!this.currentIncident) return;
+                
+                // Simulate task progress and completion events via SSE
+                const agents = ['Payment Agent', 'Fraud Agent', 'Order Agent', 'Tech Agent'];
+                const taskTypes = ['payment-analysis', 'fraud-check', 'inventory-hold', 'system-diag'];
+                
+                for (let i = 0; i < agents.length; i++) {
+                    await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 3000));
+                    
+                    // Simulate task progress SSE event
+                    await this.logSSEEvent('task_progress', {
+                        agent: agents[i],
+                        task_type: taskTypes[i],
+                        progress: 50,
+                        message: `${agents[i]} is analyzing the incident...`
+                    });
+                    
+                    await new Promise(resolve => setTimeout(resolve, 1500 + Math.random() * 2000));
+                    
+                    // Simulate task completion SSE event
+                    await this.logSSEEvent('task_completed', {
+                        agent: agents[i],
+                        task_type: taskTypes[i],
+                        progress: 100,
+                        result: this.getMockTaskResult(taskTypes[i]),
+                        message: `${agents[i]} completed analysis`
+                    });
+                }
+                
+                // Final orchestration complete event
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                await this.logSSEEvent('orchestration_complete', {
+                    incident_id: this.currentIncident,
+                    total_agents: agents.length,
+                    message: 'All agents completed analysis - incident resolution ready'
+                });
+            }
+
+            async logSSEEvent(eventType, data) {
+                const log = document.getElementById('httpLog');
+                const timestamp = new Date().toLocaleTimeString();
+                
+                let explanation = '';
+                let eventName = '';
+                
+                switch (eventType) {
+                    case 'task_progress':
+                        explanation = `💡 SSE Progress Update: ${data.agent} reporting ${data.progress}% completion`;
+                        eventName = '🌊 SSE: task_progress';
+                        break;
+                    case 'task_completed':
+                        explanation = `💡 SSE Task Complete: ${data.agent} finished with results - artifact ready`;
+                        eventName = '🌊 SSE: task_completed';
+                        break;
+                    case 'orchestration_complete':
+                        explanation = `💡 SSE Orchestration Complete: All ${data.total_agents} agents finished - incident resolved`;
+                        eventName = '🌊 SSE: orchestration_complete';
+                        break;
+                    default:
+                        explanation = `💡 SSE Event: ${eventType}`;
+                        eventName = `🌊 SSE: ${eventType}`;
+                }
+                
+                const sseElement = document.createElement('div');
+                sseElement.className = 'http-response';
+                sseElement.style.borderLeft = '4px solid #10b981';
+                sseElement.style.background = '#0f1f16';
+                
+                sseElement.innerHTML = `
+                    <div class="response-line">🌊 ${eventName}</div>
+                    <div class="explanation">${explanation}</div>
+                    <div class="timestamp">${timestamp}</div>
+                    <div class="headers">Content-Type: text/event-stream</div>
+                    <div class="body">${JSON.stringify(data, null, 2)}</div>
+                `;
+                
+                log.appendChild(sseElement);
+                log.scrollTop = log.scrollHeight;
+                
+                if (!this.tutorialMode) {
+                    await new Promise(resolve => setTimeout(resolve, this.speed === 'fast' ? 100 : this.speed === 'slow' ? 1000 : 300));
+                }
+            }
+
+            getMockTaskResult(taskType) {
+                switch (taskType) {
+                    case 'payment-analysis':
+                        return {
+                            analysis: "3DS timeout indicates issuer service disruption. Recommend retry with backup gateway.",
+                            confidence: 0.87,
+                            recommended_action: "retry_with_backup_gateway",
+                            technical_details: "Issuer authentication service unavailable for 45+ seconds"
+                        };
+                    case 'fraud-check':
+                        return {
+                            analysis: "Enterprise customer with established history. Low fraud risk score.",
+                            confidence: 0.92,
+                            risk_score: 0.15,
+                            recommendation: "APPROVE",
+                            factors: ["established_customer", "consistent_patterns", "enterprise_tier"]
+                        };
+                    case 'inventory-hold':
+                        return {
+                            analysis: "GPU inventory secured for critical customer. Expedited shipping arranged.",
+                            confidence: 0.95,
+                            hold_id: "HOLD-GPU-H100-001",
+                            expedited_shipping: true,
+                            estimated_delivery: "2024-12-03"
+                        };
+                    case 'system-diag':
+                        return {
+                            analysis: "3DS authentication service degradation detected. No infrastructure issues.",
+                            confidence: 0.89,
+                            diagnosis: "Issuer 3DS service timeout",
+                            severity: "medium",
+                            recommended_action: "monitor_and_retry"
+                        };
+                    default:
+                        return { analysis: "Task completed successfully", confidence: 0.80 };
+                }
+            }
+        }
+
+        // Global function for clear button
+        function clearHttpLog() {
+            window.demo.clearHttpLog();
+        }
+
+        // Global functions for traffic controls
+        function togglePause() {
+            window.demo.togglePause();
+        }
+
+        function changeSpeed() {
+            window.demo.changeSpeed();
+        }
+
+        function nextStep() {
+            window.demo.nextStep();
+        }
+
+        // Initialize demo
+        window.demo = new TechnicalA2ADemo();
+    </script>
+</body>
+</html> 

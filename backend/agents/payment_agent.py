@@ -2,9 +2,15 @@ import asyncio
 import random
 import json
 from datetime import datetime, timedelta
-from backend.shared.base_agent import BaseAgent
+import sys
+import os
 
-class SimulatedPaymentAgent(BaseAgent):
+# Add the parent directory to the path to import shared modules
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
+from shared.base_agent import BaseAgent
+
+class PaymentAgent(BaseAgent):
     def __init__(self):
         config = {
             "agent_card_version": "1.0",
@@ -46,6 +52,17 @@ class SimulatedPaymentAgent(BaseAgent):
                             "retry_strategy": {"type": "string"}
                         }
                     }
+                },
+                {
+                    "name": "gateway-diagnostics",
+                    "description": "Diagnose payment gateway issues",
+                    "input_schema": {
+                        "type": "object",
+                        "properties": {
+                            "gateway_name": {"type": "string"},
+                            "error_codes": {"type": "array", "items": {"type": "string"}}
+                        }
+                    }
                 }
             ],
             "authentication": {
@@ -54,7 +71,7 @@ class SimulatedPaymentAgent(BaseAgent):
                 "name": "X-API-Key"
             },
             "endpoints": {
-                "base_url": "https://agents.latentgenius.ai/payment-systems",
+                "base_url": "http://localhost:8002",
                 "tasks": "/tasks",
                 "streaming": "/stream"
             },
@@ -110,6 +127,8 @@ class SimulatedPaymentAgent(BaseAgent):
             return await self._simulate_transaction_analysis(context, task_id)
         elif skill_name == "payment-retry":
             return await self._simulate_payment_retry(context, task_id)
+        elif skill_name == "gateway-diagnostics":
+            return await self._simulate_gateway_diagnostics(context, task_id)
         else:
             raise ValueError(f"Unknown skill: {skill_name}")
     
@@ -226,6 +245,19 @@ class SimulatedPaymentAgent(BaseAgent):
                 "escalation_required": True
             }
     
+    async def _simulate_gateway_diagnostics(self, context: dict, task_id: str) -> dict:
+        """Simulate gateway diagnostics"""
+        
+        await self.send_progress_update(task_id, 50, "Running gateway diagnostics...")
+        await asyncio.sleep(2)
+        
+        return {
+            "gateway_status": "degraded",
+            "response_time": f"{random.uniform(2.0, 8.0):.1f}s",
+            "error_rate": f"{random.uniform(5.0, 15.0):.1f}%",
+            "recommendation": "increase_timeout_threshold"
+        }
+    
     def _select_weighted_scenario(self) -> str:
         """Select a failure scenario based on weighted probabilities"""
         scenarios = list(self.failure_scenarios.keys())
@@ -243,5 +275,5 @@ class SimulatedPaymentAgent(BaseAgent):
         return factors_map.get(scenario, ["unknown_factors"])
 
 if __name__ == "__main__":
-    agent = SimulatedPaymentAgent()
+    agent = PaymentAgent()
     agent.run(port=8002) 

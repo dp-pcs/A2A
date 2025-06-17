@@ -2,9 +2,15 @@ import asyncio
 import random
 import json
 from datetime import datetime, timedelta
-from backend.shared.base_agent import BaseAgent
+import sys
+import os
 
-class SimulatedFraudAgent(BaseAgent):
+# Add the parent directory to the path to import shared modules
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
+from shared.base_agent import BaseAgent
+
+class FraudAgent(BaseAgent):
     def __init__(self):
         config = {
             "agent_card_version": "1.0",
@@ -52,7 +58,7 @@ class SimulatedFraudAgent(BaseAgent):
                 "scopes": ["fraud.read", "risk.assess"]
             },
             "endpoints": {
-                "base_url": "https://agents.latentgenius.ai/fraud-detection",
+                "base_url": "http://localhost:8003",
                 "tasks": "/tasks",
                 "streaming": "/stream"
             },
@@ -349,5 +355,5 @@ class SimulatedFraudAgent(BaseAgent):
             return 95  # Very high for small customers
 
 if __name__ == "__main__":
-    agent = SimulatedFraudAgent()
+    agent = FraudAgent()
     agent.run(port=8003) 

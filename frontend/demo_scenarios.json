@@ -1,0 +1,193 @@
+{
+  "scenarios": [
+    {
+      "id": "enterprise_3ds_timeout",
+      "name": "Enterprise Payment Timeout with 3DS Challenge", 
+      "description": "Large enterprise customer experiencing 3DS authentication timeout",
+      "incident_data": {
+        "incident_type": "payment_failure",
+        "customer": {
+          "id": "globalcorp",
+          "name": "GlobalCorp Technologies", 
+          "tier": "enterprise",
+          "account_value": 2150000,
+          "established_since": "2022",
+          "purchase_history": {
+            "average_order_value": 45000,
+            "largest_previous_order": 85000,
+            "monthly_volume": 6,
+            "preferred_payment": "corporate_amex_ending_5678",
+            "last_successful_transaction": "2024-11-28T10:15:00Z"
+          },
+          "business_context": {
+            "industry": "AI/ML Infrastructure",
+            "use_case": "Training large language models",
+            "urgency": "Critical - production training pipeline blocked"
+          }
+        },
+        "order": {
+          "id": "ORD-20241201-001",
+          "amount": 50000,
+          "currency": "USD",
+          "items": [{
+            "id": "gpu-cluster-h100",
+            "name": "GPU Cluster - 8x H100 Cards for Q4 Training Pipeline",
+            "quantity": 8,
+            "unit_price": 6250
+          }],
+          "business_justification": "Approved Q4 budget expansion for model training capacity"
+        },
+        "failure_details": {
+          "transaction_id": "TXN-20241201-001",
+          "error_code": "3DS_AUTH_TIMEOUT",
+          "gateway_response": "3D Secure authentication timed out after 45 seconds - issuer authentication service unavailable",
+          "timestamp": "2024-12-01T14:23:45Z",
+          "payment_method": "corporate_amex_ending_5678",
+          "technical_context": {
+            "3ds_challenge_initiated": true,
+            "issuer_response_time": "timeout_after_45s",
+            "gateway_health": "operational",
+            "customer_browser": "Chrome 119 on macOS",
+            "previous_3ds_success": "2024-11-28T10:15:00Z"
+          }
+        },
+        "deadline": "2024-12-15T00:00:00Z"
+      },
+      "expected_ai_responses": {
+        "payment_agent": {
+          "root_cause": "3DS authentication timeout due to gateway latency",
+          "confidence": 0.87,
+          "retry_recommended": true,
+          "strategy": "3ds_bypass_with_enhanced_monitoring",
+          "success_probability": 0.94
+        },
+        "fraud_agent": {
+          "risk_level": "LOW",
+          "confidence": 0.92,
+          "recommendation": "APPROVE",
+          "bypass_approval": true
+        }
+      }
+    },
+    {
+      "id": "new_customer_high_value",
+      "name": "Suspicious High-Value Transaction from New Customer",
+      "description": "New startup customer attempting large infrastructure purchase",
+      "incident_data": {
+        "incident_type": "payment_failure",
+        "customer": {
+          "id": "startupai_inc",
+          "name": "StartupAI Inc",
+          "tier": "growth",
+          "account_value": 0,
+          "established_since": "2024"
+        },
+        "order": {
+          "id": "ORD-20241201-002",
+          "amount": 75000,
+          "currency": "USD",
+          "items": [{
+            "id": "ai-infrastructure-complete",
+            "name": "Complete AI Infrastructure Package",
+            "quantity": 1,
+            "unit_price": 75000
+          }]
+        },
+        "failure_details": {
+          "transaction_id": "TXN-20241201-002",
+          "error_code": "FRAUD_SUSPECTED",
+          "gateway_response": "Transaction flagged for manual review",
+          "timestamp": "2024-12-01T09:15:22Z",
+          "payment_method": "business_credit_card_ending_1234"
+        },
+        "deadline": "2024-12-07T00:00:00Z"
+      },
+      "expected_ai_responses": {
+        "fraud_agent": {
+          "risk_level": "MEDIUM",
+          "confidence": 0.78,
+          "recommendation": "ENHANCED_VERIFICATION",
+          "verification_steps": ["founder_video_call", "company_verification", "bank_statement"]
+        },
+        "payment_agent": {
+          "root_cause": "automated_fraud_trigger",
+          "confidence": 0.83,
+          "retry_recommended": false,
+          "strategy": "manual_verification_workflow"
+        }
+      }
+    },
+    {
+      "id": "cascading_payment_failures",
+      "name": "Complex Payment Failure Chain", 
+      "description": "Multiple cascading failures with velocity triggers",
+      "incident_data": {
+        "incident_type": "payment_failure",
+        "customer": {
+          "id": "techstartup_ltd",
+          "name": "TechStartup Ltd",
+          "tier": "standard",
+          "account_value": 125000,
+          "established_since": "2024"
+        },
+        "order": {
+          "id": "ORD-20241201-003",
+          "amount": 25000,
+          "currency": "USD",
+          "items": [{
+            "id": "cloud-infrastructure-expansion",
+            "name": "Cloud Infrastructure Expansion",
+            "quantity": 1,
+            "unit_price": 25000
+          }]
+        },
+        "failure_details": {
+          "transaction_id": "TXN-20241201-003",
+          "error_code": "VELOCITY_EXCEEDED",
+          "gateway_response": "Too many payment attempts in short timeframe",
+          "timestamp": "2024-12-01T16:45:30Z",
+          "payment_method": "business_debit_ending_7890"
+        },
+        "deadline": "2024-12-31T00:00:00Z"
+      },
+      "expected_ai_responses": {
+        "payment_agent": {
+          "root_cause": "velocity_trigger_from_legitimate_retries", 
+          "confidence": 0.91,
+          "retry_recommended": true,
+          "strategy": "velocity_exception_with_delay",
+          "wait_time": "15_minutes"
+        },
+        "fraud_agent": {
+          "risk_level": "LOW",
+          "confidence": 0.88,
+          "recommendation": "APPROVE",
+          "pattern_analysis": "legitimate_retry_pattern"
+        }
+      }
+    }
+  ],
+  "demo_flow": {
+    "setup": [
+      "Start agent registry (port 8000)",
+      "Start smart payment agent (port 8002)", 
+      "Start smart fraud agent (port 8003)",
+      "Start orchestrator (port 8001)",
+      "Open smart demo UI (frontend/smart-demo.html)"
+    ],
+    "scenario_execution": [
+      "Select scenario from dropdown",
+      "Click 'Create Incident' to trigger agents",
+      "Watch real-time AI analysis in UI",
+      "Review agent reasoning and recommendations",
+      "Compare with expected AI responses"
+    ],
+    "key_observations": [
+      "AI reasoning quality and accuracy",
+      "Cross-agent coordination and consensus",
+      "Confidence scores and risk assessments", 
+      "Personalized responses based on customer context",
+      "Graceful fallback if API keys unavailable"
+    ]
+  }
+} 

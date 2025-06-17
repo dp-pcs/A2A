@@ -2,9 +2,15 @@ import asyncio
 import random
 import json
 from datetime import datetime, timedelta
-from backend.shared.base_agent import BaseAgent
+import sys
+import os
 
-class SimulatedTechAgent(BaseAgent):
+# Add the parent directory to the path to import shared modules
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
+from shared.base_agent import BaseAgent
+
+class TechAgent(BaseAgent):
     def __init__(self):
         config = {
             "agent_card_version": "1.0",
@@ -42,7 +48,7 @@ class SimulatedTechAgent(BaseAgent):
                 "name": "X-Tech-API-Key"
             },
             "endpoints": {
-                "base_url": "https://agents.latentgenius.ai/tech-support",
+                "base_url": "http://localhost:8005",
                 "tasks": "/tasks",
                 "streaming": "/stream"
             },
@@ -106,5 +112,5 @@ class SimulatedTechAgent(BaseAgent):
         }
 
 if __name__ == "__main__":
-    agent = SimulatedTechAgent()
+    agent = TechAgent()
     agent.run(port=8005) 

@@ -2,9 +2,15 @@ import asyncio
 import random
 import json
 from datetime import datetime, timedelta
-from backend.shared.base_agent import BaseAgent
+import sys
+import os
 
-class SimulatedOrderAgent(BaseAgent):
+# Add the parent directory to the path to import shared modules
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
+from shared.base_agent import BaseAgent
+
+class OrderAgent(BaseAgent):
     def __init__(self):
         config = {
             "agent_card_version": "1.0",
@@ -43,7 +49,7 @@ class SimulatedOrderAgent(BaseAgent):
                 "bearer_format": "JWT"
             },
             "endpoints": {
-                "base_url": "https://agents.latentgenius.ai/order-management",
+                "base_url": "http://localhost:8004",
                 "tasks": "/tasks",
                 "streaming": "/stream"
             },
@@ -117,5 +123,5 @@ class SimulatedOrderAgent(BaseAgent):
         }
 
 if __name__ == "__main__":
-    agent = SimulatedOrderAgent()
+    agent = OrderAgent()
     agent.run(port=8004) 

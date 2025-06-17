@@ -73,7 +73,8 @@ class BaseAgent(ABC):
             """Create and execute a new task"""
             
             task_id = request.params.get("task_id", str(uuid.uuid4()))
-            skill_required = request.params.get("skill_required")
+            # Use JSON-RPC method field as the skill name, fallback to params for compatibility
+            skill_required = request.method or request.params.get("skill_required")
             
             # Validate skill availability
             available_skills = [skill["name"] for skill in self.config["skills"]]
@@ -100,7 +101,10 @@ class BaseAgent(ABC):
             self.task_streams[task_id] = asyncio.Queue()
             
             # Start task execution in background
-            background_tasks.add_task(self._execute_task, task_id, request.params)
+            # Add skill_required to params for execute_task
+            execution_params = request.params.copy()
+            execution_params["skill_required"] = skill_required
+            background_tasks.add_task(self._execute_task, task_id, execution_params)
             
             return TaskResponse(
                 id=request.id,
@@ -322,4 +326,20 @@ class BaseAgent(ABC):
     def run(self, host: str = "0.0.0.0", port: int = 8001):
         """Run the agent service"""
         import uvicorn
+        import threading
+        import time
+        
+        # Register with registry in a separate thread after service starts
+        def register_after_startup():
+            time.sleep(3)  # Wait for service to be ready
+            import asyncio
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            loop.run_until_complete(self.register_with_registry("http://localhost:8000"))
+            loop.close()
+        
+        # Start registration in background
+        registration_thread = threading.Thread(target=register_after_startup, daemon=True)
+        registration_thread.start()
+        
         uvicorn.run(self.app, host=host, port=port) 

@@ -148,7 +148,8 @@ class A2ADemoController {
 
     async createIncident(scenarioName, scenario) {
         try {
-            const response = await fetch('/api/incidents', {
+            // Call the orchestrator directly on port 8001
+            const response = await fetch('http://localhost:8001/api/incidents', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -163,12 +164,15 @@ class A2ADemoController {
             });
 
             if (!response.ok) {
-                throw new Error(`Failed to create incident: ${response.statusText}`);
+                console.log(`Orchestrator not available (${response.status}), falling back to simulation`);
+                return this.createSimulatedIncident(scenarioName, scenario);
             }
 
-            return await response.json();
+            const result = await response.json();
+            console.log('✅ Connected to real orchestrator:', result);
+            return result;
         } catch (error) {
-            console.error('Error creating incident:', error);
+            console.log('🔄 Orchestrator not available, using simulation:', error.message);
             // Fallback to simulated incident for demo
             return this.createSimulatedIncident(scenarioName, scenario);
         }
@@ -222,25 +226,46 @@ class A2ADemoController {
 
     async simulateAgentCoordination() {
         const timeline = [
-            { time: 2000, action: 'show_communication', from: 'orchestrator', to: 'payment-sys-001', message: 'Analyze transaction TXN-20241201-456789' },
-            { time: 2500, action: 'show_communication', from: 'orchestrator', to: 'fraud-detect-001', message: 'Perform risk assessment for CORP-12345' },
-            { time: 3000, action: 'show_communication', from: 'orchestrator', to: 'order-mgmt-001', message: 'Hold inventory for ORD-789123' },
-            { time: 3500, action: 'show_communication', from: 'orchestrator', to: 'tech-support-001', message: 'Diagnose payment gateway issues' },
+            // Initial Alert
+            { time: 500, action: 'activity_alert', level: 'critical', message: '🚨 CRITICAL INCIDENT: $49,999.99 payment failure detected for enterprise customer GlobalCorp', detail: 'Transaction TXN-20241201-456789 failed due to 3DS authentication timeout. Automatic A2A orchestration initiated.' },
             
-            { time: 8000, action: 'agent_progress', agent: 'payment-sys-001', progress: 45, message: 'Analyzing transaction patterns...' },
-            { time: 10000, action: 'agent_progress', agent: 'fraud-detect-001', progress: 60, message: 'Verifying customer identity...' },
-            { time: 12000, action: 'agent_progress', agent: 'order-mgmt-001', progress: 80, message: 'Inventory reserved for 45 minutes' },
-            { time: 14000, action: 'agent_progress', agent: 'tech-support-001', progress: 70, message: 'Identified high latency in 3DS service' },
+            // Orchestrator dispatches tasks
+            { time: 2000, action: 'activity_alert', level: 'info', message: '🎯 Orchestrator analyzing incident and dispatching specialized agents', detail: 'Multi-agent coordination protocol activated. Identifying required skills: payment analysis, fraud assessment, inventory management, technical diagnostics.' },
+            { time: 2200, action: 'show_communication', from: 'orchestrator', to: 'payment-sys-001', message: 'PRIORITY: Analyze failed transaction TXN-20241201-456789 - Corporate customer at risk' },
+            { time: 2500, action: 'show_communication', from: 'orchestrator', to: 'fraud-detect-001', message: 'VERIFY: Risk assessment for CORP-12345 - $49K transaction requires validation' },
+            { time: 3000, action: 'show_communication', from: 'orchestrator', to: 'order-mgmt-001', message: 'URGENT: Secure inventory hold for ORD-789123 - AI Compute Cluster (1 unit)' },
+            { time: 3500, action: 'show_communication', from: 'orchestrator', to: 'tech-support-001', message: 'DIAGNOSE: Payment gateway latency issues affecting 3DS authentication' },
             
-            { time: 18000, action: 'show_communication', from: 'fraud-detect-001', to: 'payment-sys-001', message: 'Risk assessment: LOW (0.15) - APPROVED' },
-            { time: 20000, action: 'show_communication', from: 'tech-support-001', to: 'payment-sys-001', message: '3DS bypass approved for verified corporate customer' },
+            // Agents start working
+            { time: 5000, action: 'activity_alert', level: 'working', message: '🔍 Payment Agent: Deep-diving into Stripe gateway logs and transaction metadata', detail: 'Analyzing 35-second timeout against 30s threshold. Checking for patterns in recent 3DS failures for corporate accounts.' },
+            { time: 6000, action: 'activity_alert', level: 'working', message: '🛡️  Fraud Agent: Cross-referencing customer profile against risk databases', detail: 'GlobalCorp has excellent payment history (2.5M account value). Validating IP geolocation and device fingerprinting for this $49K transaction.' },
+            { time: 7000, action: 'activity_alert', level: 'working', message: '📦 Order Agent: Coordinating with inventory systems for critical hold placement', detail: 'AI Compute Cluster (SKU: AI-COMPUTE-CLUSTER) - Last unit in stock. Extending hold duration to 45 minutes given payment resolution in progress.' },
+            { time: 8000, action: 'activity_alert', level: 'working', message: '🔧 Tech Agent: Running diagnostics on payment infrastructure performance', detail: 'Detected elevated latency in 3DS challenge service. Average response time: 32.8s (normal: 18s). Investigating root cause and bypass options.' },
             
-            { time: 25000, action: 'agent_complete', agent: 'fraud-detect-001', result: 'Customer verified - LOW risk (0.15)' },
-            { time: 27000, action: 'agent_complete', agent: 'order-mgmt-001', result: 'Inventory secured - Hold expires in 45min' },
-            { time: 29000, action: 'agent_complete', agent: 'tech-support-001', result: 'Gateway optimized - 3DS bypass enabled' },
-            { time: 32000, action: 'agent_complete', agent: 'payment-sys-001', result: 'Payment retry successful - $49,999.99 processed' },
+            // Progress updates with technical details
+            { time: 8000, action: 'agent_progress', agent: 'payment-sys-001', progress: 45, message: 'Identified 3DS timeout as root cause - analyzing retry strategies' },
+            { time: 10000, action: 'agent_progress', agent: 'fraud-detect-001', progress: 60, message: 'Customer verification complete - Corporate account in good standing' },
+            { time: 12000, action: 'agent_progress', agent: 'order-mgmt-001', progress: 80, message: 'Inventory hold secured - System reserved last available unit' },
+            { time: 14000, action: 'agent_progress', agent: 'tech-support-001', progress: 70, message: 'Gateway diagnostics complete - 3DS bypass strategy identified' },
             
-            { time: 35000, action: 'show_resolution', message: 'Incident resolved via coordinated agent response. Payment retry successful, inventory secured, customer notified.' }
+            // Agent-to-agent coordination
+            { time: 16000, action: 'activity_alert', level: 'coordination', message: '🤝 Inter-agent coordination: Fraud → Payment', detail: 'Fraud Agent sharing risk assessment with Payment Agent. Customer cleared for bypass authentication due to verified corporate status and excellent payment history.' },
+            { time: 18000, action: 'show_communication', from: 'fraud-detect-001', to: 'payment-sys-001', message: '✅ CLEARED: Risk score 0.15 (LOW) - Corporate customer verified, bypass approved' },
+            { time: 19000, action: 'activity_alert', level: 'coordination', message: '🤝 Inter-agent coordination: Tech → Payment', detail: 'Tech Agent providing gateway optimization parameters to Payment Agent. 3DS bypass enabled for verified corporate accounts to prevent future timeouts.' },
+            { time: 20000, action: 'show_communication', from: 'tech-support-001', to: 'payment-sys-001', message: '⚡ OPTIMIZED: 3DS bypass parameters configured - retry authorization granted' },
+            
+            // Resolution phase
+            { time: 22000, action: 'activity_alert', level: 'success', message: '🎯 Payment Agent initiating retry with optimized parameters', detail: 'Using 3DS bypass for verified corporate customer. Expected success rate: 97%. Processing $49,999.99 charge with fraud clearance and gateway optimization.' },
+            { time: 25000, action: 'agent_complete', agent: 'fraud-detect-001', result: '✅ Customer verification complete - Corporate account authenticated (Risk: 0.15)' },
+            { time: 26000, action: 'activity_alert', level: 'success', message: '✅ Fraud Agent: Customer identity and transaction legitimacy confirmed', detail: 'GlobalCorp validated as enterprise customer with 2.5M account value. Transaction approved for processing with fraud clearance certificate.' },
+            { time: 27000, action: 'agent_complete', agent: 'order-mgmt-001', result: '✅ Inventory secured and shipping expedited - Hold active for 45 minutes' },
+            { time: 28000, action: 'activity_alert', level: 'success', message: '✅ Order Agent: Critical inventory secured and shipping prioritized', detail: 'Last AI Compute Cluster unit reserved. Expedited shipping arranged. Customer will receive tracking information within 2 hours of payment confirmation.' },
+            { time: 29000, action: 'agent_complete', agent: 'tech-support-001', result: '✅ Gateway performance optimized - 3DS bypass enabled for corporate accounts' },
+            { time: 30000, action: 'activity_alert', level: 'success', message: '✅ Tech Agent: Payment infrastructure optimized for future transactions', detail: 'Implemented corporate customer 3DS bypass. Average processing time reduced from 35s to 8s. Similar timeouts prevented for verified accounts.' },
+            { time: 32000, action: 'agent_complete', agent: 'payment-sys-001', result: '✅ Payment successful - $49,999.99 processed via optimized gateway' },
+            { time: 33000, action: 'activity_alert', level: 'resolved', message: '🎉 Payment Agent: Transaction successfully processed!', detail: 'Retry successful using optimized parameters. $49,999.99 charged to corporate card ending in 5678. Transaction ID: TXN-20241201-789456. Customer notification sent.' },
+            
+            { time: 35000, action: 'show_resolution', message: '🎯 INCIDENT RESOLVED: Multi-agent coordination successfully recovered $49,999.99 transaction. Customer satisfied, inventory secured, system optimized.' }
         ];
 
         for (const event of timeline) {
@@ -254,22 +279,36 @@ class A2ADemoController {
         if (!this.dashboard) return;
 
         switch (event.action) {
+            case 'activity_alert':
+                // New action for detailed, verbose activity alerts
+                this.dashboard.addActivity({
+                    timestamp: new Date(),
+                    agent: 'system',
+                    message: event.message,
+                    detail: event.detail,
+                    level: event.level,
+                    type: event.level || 'info'
+                });
+                break;
+                
             case 'show_communication':
                 this.dashboard.showCommunication(event.from, event.to, event.message);
                 this.dashboard.addActivity({
                     timestamp: new Date(),
                     agent: event.from,
-                    message: `→ ${event.to}: ${event.message}`,
+                    message: `→ ${this.getAgentDisplayName(event.to)}: ${event.message}`,
                     type: 'communication'
                 });
                 break;
                 
             case 'agent_progress':
                 this.dashboard.updateAgentProgress(event.agent, event.progress, event.message);
+                // Add working animation for obvious visual feedback
+                this.dashboard.animateAgentWorking(event.agent);
                 this.dashboard.addActivity({
                     timestamp: new Date(),
                     agent: event.agent,
-                    message: event.message,
+                    message: `📊 ${event.message}`,
                     type: 'progress'
                 });
                 break;
@@ -279,7 +318,7 @@ class A2ADemoController {
                 this.dashboard.addActivity({
                     timestamp: new Date(),
                     agent: event.agent,
-                    message: `✓ ${event.result}`,
+                    message: `${event.result}`,
                     type: 'completion'
                 });
                 break;
@@ -296,6 +335,17 @@ class A2ADemoController {
         }
     }
 
+    getAgentDisplayName(agentId) {
+        const displayNames = {
+            'payment-sys-001': 'Payment Agent',
+            'fraud-detect-001': 'Fraud Agent',
+            'order-mgmt-001': 'Order Agent',
+            'tech-support-001': 'Tech Agent',
+            'orchestrator': 'Orchestrator'
+        };
+        return displayNames[agentId] || agentId;
+    }
+
     async monitorIncidentProgress(incidentId) {
         // For real backend integration
         const maxAttempts = 30;
@@ -303,7 +353,8 @@ class A2ADemoController {
         
         while (attempts < maxAttempts && this.isRunning) {
             try {
-                const response = await fetch(`/api/incidents/${incidentId}`);
+                // Call the orchestrator directly on port 8001
+                const response = await fetch(`http://localhost:8001/api/incidents/${incidentId}`);
                 if (response.ok) {
                     const incident = await response.json();
                     
@@ -317,9 +368,10 @@ class A2ADemoController {
                     
                     // Update dashboard with real progress
                     this.updateDashboardFromIncident(incident);
+                    console.log('📊 Real incident progress:', incident.status);
                 }
             } catch (error) {
-                console.log('Backend not available, using simulation');
+                console.log('🔄 Backend not available, using simulation');
                 break;
             }
             

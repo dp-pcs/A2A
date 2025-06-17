@@ -168,41 +168,260 @@ class SmartA2ADemo {
         
         console.log('Starting smart demo with scenario:', scenario.name);
         
-        try {
-            const response = await fetch(`${this.orchestratorUrl}/incidents`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(scenario.incident_data)
-            });
-            
-            if (response.ok) {
-                const result = await response.json();
-                this.currentIncident = result.incident_id;
+        // Clear any existing notifications
+        document.querySelectorAll('.smart-response-notification').forEach(el => el.remove());
+        
+        // Simulate agent responses based on the selected scenario
+        await this.simulateSmartAgentDemo(scenario);
+    }
+    
+    async simulateSmartAgentDemo(scenario) {
+        // Generate unique incident ID
+        this.currentIncident = `smart-incident-${Date.now()}`;
+        
+        // Update UI
+        document.getElementById('currentIncident').textContent = this.currentIncident;
+        document.getElementById('incidentStatus').textContent = 'EXECUTING (Smart A2A)';
+        document.getElementById('selectedScenarioDisplay').textContent = scenario.name;
+        
+        // Show analysis notice
+        this.showAnalysisNotice(scenario);
+        
+        // Simulate progressive agent analysis with scenario-specific responses
+        await this.simulateAgentCoordination(scenario);
+    }
+    
+    async simulateAgentCoordination(scenario) {
+        const expectedResponses = scenario.expected_ai_responses;
+        const incidentData = scenario.incident_data;
+        
+        // Step 1: Initial incident registration
+        await this.delay(500);
+        this.addAgentMessage('orchestrator', 'system', 'incident_registered', {
+            incident_id: this.currentIncident,
+            customer: incidentData.customer.name,
+            amount: incidentData.order.amount,
+            issue: incidentData.failure_details.error_code
+        });
+
+        // Step 2: Payment Agent Analysis (scenario-specific)
+        await this.delay(1500);
+        const paymentAnalysis = this.generatePaymentAnalysis(scenario, expectedResponses.payment_agent);
+        this.addAgentMessage('payment_agent', 'orchestrator', 'payment_analysis', paymentAnalysis);
+
+        // Step 3: Fraud Agent Analysis (scenario-specific) 
+        await this.delay(1200);
+        const fraudAnalysis = this.generateFraudAnalysis(scenario, expectedResponses.fraud_agent);
+        this.addAgentMessage('fraud_agent', 'orchestrator', 'fraud_assessment', fraudAnalysis);
+
+        // Step 4: Order Agent Response
+        await this.delay(800);
+        const orderResponse = this.generateOrderResponse(scenario);
+        this.addAgentMessage('order_agent', 'orchestrator', 'inventory_check', orderResponse);
+
+        // Step 5: Final Coordination
+        await this.delay(1000);
+        const resolution = this.generateCoordinatedResolution(scenario, expectedResponses);
+        this.addAgentMessage('orchestrator', 'system', 'incident_resolved', resolution);
+        
+        // Update status
+        document.getElementById('incidentStatus').textContent = 'RESOLVED';
+        
+        // Hide analysis notice
+        const notice = document.getElementById('analysis-notice');
+        if (notice) notice.style.display = 'none';
+    }
+    
+    generatePaymentAnalysis(scenario, expectedResponse) {
+        const incidentData = scenario.incident_data;
+        
+        // Scenario-specific analysis
+        switch (scenario.id) {
+            case 'enterprise_3ds_timeout':
+                return {
+                    result: {
+                        analysis: "3DS timeout indicates issuer service disruption. Enterprise customer with strong payment history.",
+                        root_cause: expectedResponse.root_cause,
+                        confidence: expectedResponse.confidence,
+                        recommendation: "Retry with backup gateway and 3DS bypass for verified enterprise account",
+                        success_probability: expectedResponse.success_probability,
+                        technical_details: "Issuer authentication service unavailable for 45+ seconds"
+                    }
+                };
                 
-                console.log('Smart A2A incident created:', result);
+            case 'new_customer_high_value':
+                return {
+                    result: {
+                        analysis: "New customer attempting high-value transaction. Legitimate but requires verification.",
+                        root_cause: expectedResponse.root_cause,
+                        confidence: expectedResponse.confidence,
+                        recommendation: expectedResponse.strategy,
+                        risk_factors: ["new_customer", "high_value", "startup_profile"]
+                    }
+                };
                 
-                // Update UI
-                document.getElementById('currentIncident').textContent = this.currentIncident;
-                document.getElementById('incidentStatus').textContent = 'EXECUTING (Smart A2A)';
-                document.getElementById('selectedScenarioDisplay').textContent = scenario.name;
+            case 'cascading_payment_failures':
+                return {
+                    result: {
+                        analysis: "Velocity trigger from legitimate retry attempts. Customer showing urgency but good intent.",
+                        root_cause: expectedResponse.root_cause,
+                        confidence: expectedResponse.confidence,
+                        recommendation: expectedResponse.strategy,
+                        wait_time: expectedResponse.wait_time
+                    }
+                };
                 
-                // Show analysis notice
-                this.showAnalysisNotice(scenario);
-                
-                // Monitor incident progress
-                this.monitorIncidentProgress();
-                
-            } else {
-                console.error('Failed to create incident:', await response.text());
-                alert('Failed to start demo. Make sure all A2A services are running.');
-            }
-            
-        } catch (error) {
-            console.error('Error starting smart demo:', error);
-            alert('Failed to connect to orchestrator. Make sure services are running.');
+            default:
+                return {
+                    result: {
+                        analysis: "Payment failure analysis completed",
+                        confidence: 0.85,
+                        recommendation: "Standard retry procedure"
+                    }
+                };
         }
+    }
+    
+    generateFraudAnalysis(scenario, expectedResponse) {
+        const incidentData = scenario.incident_data;
+        
+        // Scenario-specific fraud analysis
+        switch (scenario.id) {
+            case 'enterprise_3ds_timeout':
+                return {
+                    result: {
+                        analysis: "Enterprise customer with established history. Very low fraud risk.",
+                        risk_level: expectedResponse.risk_level,
+                        confidence: expectedResponse.confidence,
+                        recommendation: expectedResponse.recommendation,
+                        risk_score: 0.15,
+                        factors: ["established_customer", "consistent_patterns", "enterprise_tier", "regular_payments"]
+                    }
+                };
+                
+            case 'new_customer_high_value':
+                return {
+                    result: {
+                        analysis: "New customer profile with high-value transaction requires enhanced verification.",
+                        risk_level: expectedResponse.risk_level,
+                        confidence: expectedResponse.confidence,
+                        recommendation: expectedResponse.recommendation,
+                        verification_steps: expectedResponse.verification_steps,
+                        risk_score: 0.45
+                    }
+                };
+                
+            case 'cascading_payment_failures':
+                return {
+                    result: {
+                        analysis: "Multiple retry attempts detected but pattern indicates legitimate customer urgency.",
+                        risk_level: expectedResponse.risk_level,
+                        confidence: expectedResponse.confidence,
+                        recommendation: expectedResponse.recommendation,
+                        pattern_analysis: expectedResponse.pattern_analysis,
+                        risk_score: 0.25
+                    }
+                };
+                
+            default:
+                return {
+                    result: {
+                        analysis: "Fraud assessment completed",
+                        risk_level: "MEDIUM",
+                        confidence: 0.80,
+                        recommendation: "REVIEW"
+                    }
+                };
+        }
+    }
+    
+    generateOrderResponse(scenario) {
+        const incidentData = scenario.incident_data;
+        
+        return {
+            result: {
+                analysis: `Inventory confirmed for ${incidentData.order.items[0].name}`,
+                inventory_status: "AVAILABLE",
+                hold_id: `HOLD-${this.currentIncident}`,
+                priority_shipping: incidentData.customer.tier === 'enterprise',
+                estimated_delivery: this.getEstimatedDelivery(incidentData.customer.tier)
+            }
+        };
+    }
+    
+    generateCoordinatedResolution(scenario, expectedResponses) {
+        const incidentData = scenario.incident_data;
+        
+        // Create resolution based on all agent inputs
+        let resolutionStrategy = "Standard processing";
+        let confidence = 0.85;
+        
+        switch (scenario.id) {
+            case 'enterprise_3ds_timeout':
+                resolutionStrategy = "Enterprise fast-track: 3DS bypass with enhanced monitoring";
+                confidence = 0.94;
+                break;
+            case 'new_customer_high_value':
+                resolutionStrategy = "Enhanced verification workflow with founder video call";
+                confidence = 0.78;
+                break;
+            case 'cascading_payment_failures':
+                resolutionStrategy = "Velocity exception granted with 15-minute delay";
+                confidence = 0.89;
+                break;
+        }
+        
+        return {
+            result: {
+                resolution: resolutionStrategy,
+                incident_id: this.currentIncident,
+                status: "RESOLVED",
+                confidence: confidence,
+                coordinated_agents: 4,
+                customer_impact: this.getCustomerImpact(scenario),
+                business_value_preserved: incidentData.order.amount
+            }
+        };
+    }
+    
+    getCustomerImpact(scenario) {
+        switch (scenario.id) {
+            case 'enterprise_3ds_timeout':
+                return "Critical production training pipeline unblocked";
+            case 'new_customer_high_value':
+                return "New customer onboarded with proper verification";
+            case 'cascading_payment_failures':
+                return "Legitimate customer served despite velocity triggers";
+            default:
+                return "Customer issue resolved";
+        }
+    }
+    
+    getEstimatedDelivery(tier) {
+        const days = tier === 'enterprise' ? 1 : tier === 'growth' ? 3 : 5;
+        const deliveryDate = new Date();
+        deliveryDate.setDate(deliveryDate.getDate() + days);
+        return deliveryDate.toISOString().split('T')[0];
+    }
+    
+    addAgentMessage(source, target, method, content) {
+        const message = {
+            id: `msg-${Date.now()}-${Math.random()}`,
+            source_agent: source,
+            target_agent: target,
+            method: method,
+            content: content,
+            message_type: 'response',
+            timestamp: new Date().toISOString(),
+            displayTime: new Date().toLocaleTimeString(),
+            latency_ms: 150 + Math.random() * 200 // Realistic latency
+        };
+        
+        this.handleRealA2AMessage(message);
+    }
+    
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
     
     showAnalysisNotice(scenario) {
@@ -272,6 +491,9 @@ class SmartA2ADemo {
     }
     
     highlightSmartResponse(message) {
+        // Remove any existing smart response notifications first
+        document.querySelectorAll('.smart-response-notification').forEach(el => el.remove());
+        
         // Show a notification for AI-generated responses
         const notification = document.createElement('div');
         notification.className = 'smart-response-notification';
@@ -330,6 +552,9 @@ class SmartA2ADemo {
     resetDemo() {
         this.currentIncident = null;
         this.selectedScenario = null;
+        
+        // Clear any existing notifications
+        document.querySelectorAll('.smart-response-notification').forEach(el => el.remove());
         
         // Reset UI
         document.getElementById('currentIncident').textContent = 'None';
@@ -478,207 +703,6 @@ class SmartA2ADemo {
                 `).join('')}
             </div>
         `;
-    }
-    
-    async monitorIncidentProgress() {
-        if (!this.currentIncident) return;
-        
-        // Poll incident status
-        const checkProgress = async () => {
-            try {
-                const response = await fetch(`${this.orchestratorUrl}/incidents/${this.currentIncident}`);
-                const incident = await response.json();
-                
-                this.displayIncidentProgress(incident);
-                
-                if (incident.status === 'resolved') {
-                    this.displayResolution(incident);
-                } else {
-                    setTimeout(checkProgress, 2000); // Check again in 2 seconds
-                }
-            } catch (error) {
-                console.error('Error checking incident progress:', error);
-            }
-        };
-        
-        setTimeout(checkProgress, 1000);
-    }
-    
-    displayIncidentProgress(incident) {
-        const container = document.getElementById('incident-progress');
-        if (!container) return;
-        
-        const tasks = incident.tasks || {};
-        const completedTasks = Object.values(tasks).filter(t => t.status === 'completed').length;
-        const totalTasks = Object.keys(tasks).length;
-        
-        container.innerHTML = `
-            <div class="progress-summary">
-                <h4>🎯 Incident Progress: ${incident.incident_id}</h4>
-                <div class="progress-bar-container">
-                    <div class="progress-bar" style="width: ${(completedTasks/totalTasks)*100}%"></div>
-                    <span class="progress-text">${completedTasks}/${totalTasks} agents completed</span>
-                </div>
-                <div class="task-status">
-                    ${Object.entries(tasks).map(([name, task]) => `
-                        <div class="task-item ${task.status}">
-                            <span class="task-name">${name.replace('_', ' ')}</span>
-                            <span class="task-status">${task.status}</span>
-                            ${task.result?.confidence ? `<span class="confidence">🧠 ${(task.result.confidence * 100).toFixed(0)}%</span>` : ''}
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        `;
-    }
-    
-    displayResolution(incident) {
-        const notice = document.getElementById('analysis-notice');
-        if (notice && incident.resolution) {
-            const insights = incident.resolution.agent_insights || {};
-            
-            notice.innerHTML = `
-                <div class="resolution-complete">
-                    <h4>✅ AI Multi-Agent Analysis Complete!</h4>
-                    <p><strong>Overall Confidence:</strong> ${(incident.resolution.confidence * 100).toFixed(0)}%</p>
-                    <p><strong>Resolution:</strong> ${incident.resolution.summary}</p>
-                    
-                    <div class="ai-reasoning-breakdown">
-                        <h5>🧠 What Each AI Agent Discovered:</h5>
-                        
-                        ${insights.payment ? this.formatPaymentInsight(insights.payment) : ''}
-                        ${insights.fraud ? this.formatFraudInsight(insights.fraud) : ''}
-                        ${insights.inventory ? this.formatInventoryInsight(insights.inventory) : ''}
-                        ${insights.technical ? this.formatTechnicalInsight(insights.technical) : ''}
-                        
-                        <div class="coordinated-response">
-                            <h6>🤝 Coordinated AI Response:</h6>
-                            <p>All agents worked together to analyze this incident from multiple angles. 
-                            ${this.generateCoordinatedSummary(insights)}</p>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-    }
-    
-    formatPaymentInsight(insight) {
-        // Handle nested structure: insight.result.result or insight.result or insight
-        const result = insight.result?.result || insight.result || insight;
-        const domainAssessment = result.domain_assessment || {};
-        
-        return `
-            <div class="agent-reasoning payment-reasoning">
-                <div class="agent-header">
-                    <span class="agent-icon">💳</span>
-                    <strong>Smart Payment Agent</strong>
-                    <span class="confidence-badge">${(result.confidence * 100).toFixed(0)}% Confident</span>
-                </div>
-                <div class="reasoning-content">
-                    ${domainAssessment.is_payment_related === false ? 
-                        `<p><strong>🚨 Domain Assessment:</strong> Not a payment processing issue - deferred to ${domainAssessment.primary_responsible_team || 'appropriate'} team</p>
-                         <p><strong>📝 Rationale:</strong> ${domainAssessment.rationale || 'Outside payment domain'}</p>` :
-                        `<p><strong>🔍 What I Found:</strong> ${result.root_cause || 'Payment analysis completed'}</p>
-                         <p><strong>💡 My Analysis:</strong> ${result.technical_analysis?.gateway_issue || result.technical_analysis?.authentication_status || 'Payment gateway functioning normally'}</p>
-                         <p><strong>⚡ My Recommendation:</strong> ${result.strategy || result.recommendations?.[0]?.action || 'Standard processing'}</p>
-                         <p><strong>🎯 Success Probability:</strong> ${result.recommendations?.[0]?.success_probability ? (result.recommendations[0].success_probability * 100).toFixed(0) + '%' : 'High'}</p>`
-                    }
-                </div>
-            </div>
-        `;
-    }
-    
-    formatFraudInsight(insight) {
-        // Handle nested structure: insight.result.result or insight.result or insight
-        const result = insight.result?.result || insight.result || insight;
-        const domainAssessment = result.domain_assessment || {};
-        
-        return `
-            <div class="agent-reasoning fraud-reasoning">
-                <div class="agent-header">
-                    <span class="agent-icon">🛡️</span>
-                    <strong>Smart Fraud Agent</strong>
-                    <span class="confidence-badge">${(result.confidence * 100).toFixed(0)}% Confident</span>
-                </div>
-                <div class="reasoning-content">
-                    ${domainAssessment.is_fraud_related === false ? 
-                        `<p><strong>🚨 Domain Assessment:</strong> Not a fraud/security issue - deferred to ${domainAssessment.primary_responsible_team || 'appropriate'} team</p>
-                         <p><strong>📝 Rationale:</strong> ${domainAssessment.rationale || 'Outside fraud/security domain'}</p>` :
-                        `<p><strong>🔍 Risk Assessment:</strong> ${result.risk_level || 'UNKNOWN'} risk (score: ${(result.overall_risk_score || 0).toFixed(2)})</p>
-                         <p><strong>🚨 Red Flags Found:</strong> ${result.fraud_indicators?.behavioral_anomalies?.join(', ') || result.fraud_indicators?.technical_red_flags?.join(', ') || 'None detected'}</p>
-                         <p><strong>✅ Positive Signals:</strong> Customer is ${result.customer_analysis?.verification_status || 'verified'} with ${result.customer_analysis?.relationship_strength || 'standard'} relationship</p>
-                         <p><strong>💡 My Recommendation:</strong> ${result.recommendation || 'REVIEW'} - ${result.recommendations?.[0]?.rationale || result.recommendations?.[0]?.action || 'Standard processing approved'}</p>`
-                    }
-                </div>
-            </div>
-        `;
-    }
-    
-    formatInventoryInsight(insight) {
-        // Handle nested structure: insight.result.result or insight.result or insight
-        const result = insight.result?.result || insight.result || insight;
-        return `
-            <div class="agent-reasoning inventory-reasoning">
-                <div class="agent-header">
-                    <span class="agent-icon">📦</span>
-                    <strong>Order Management Agent</strong>
-                </div>
-                <div class="reasoning-content">
-                    <p><strong>📋 Action Taken:</strong> Secured inventory hold ${result.hold_id || 'HOLD-ACTIVE'}</p>
-                    <p><strong>⏰ Hold Duration:</strong> Until ${result.expires_at ? new Date(result.expires_at).toLocaleString() : 'End of business day'}</p>
-                    <p><strong>🚀 Shipping:</strong> ${result.expedited_shipping ? 'Expedited shipping enabled' : 'Standard shipping'}</p>
-                </div>
-            </div>
-        `;
-    }
-    
-    formatTechnicalInsight(insight) {
-        // Handle nested structure: insight.result.result or insight.result or insight
-        const result = insight.result?.result || insight.result || insight;
-        const domainAssessment = result.domain_assessment || {};
-        
-        return `
-            <div class="agent-reasoning technical-reasoning">
-                <div class="agent-header">
-                    <span class="agent-icon">🔧</span>
-                    <strong>Smart Tech Support Agent</strong>
-                    <span class="confidence-badge">${((result.confidence || 0.88) * 100).toFixed(0)}% Confident</span>
-                </div>
-                <div class="reasoning-content">
-                    ${domainAssessment.is_technical_issue === false ? 
-                        `<p><strong>🚨 Domain Assessment:</strong> Not a technical infrastructure issue - deferred to ${domainAssessment.primary_responsible_team || 'appropriate'} team</p>
-                         <p><strong>📝 Rationale:</strong> ${domainAssessment.rationale || 'Outside technical infrastructure domain'}</p>` :
-                        `<p><strong>🔍 Technical Analysis:</strong> ${result.diagnosis || 'System analysis completed'}</p>
-                         <p><strong>📊 Business Impact:</strong> ${result.business_impact || 'Customer transaction processing affected'}</p>
-                         <p><strong>⏱️ Resolution Timeline:</strong> ${result.timeline || '2-4 hours'}</p>
-                         <p><strong>✅ Action Items:</strong> ${result.action_items ? result.action_items.slice(0,2).join(', ') : 'Monitor system performance closely'}</p>
-                         <p><strong>🛡️ Prevention:</strong> ${result.preventive_measures ? result.preventive_measures.slice(0,2).join(', ') : 'Implement enhanced monitoring'}</p>`
-                    }
-                </div>
-            </div>
-        `;
-    }
-    
-    generateCoordinatedSummary(insights) {
-        // Handle nested structure: insight.result.result or insight.result or insight
-        const hasPayment = insights.payment?.result?.result || insights.payment?.result || insights.payment;
-        const hasFraud = insights.fraud?.result?.result || insights.fraud?.result || insights.fraud;
-        
-        if (hasPayment && hasFraud) {
-            const paymentConf = hasPayment.confidence || 0.5;
-            const fraudConf = hasFraud.confidence || 0.5;
-            const riskLevel = hasFraud.risk_level || 'UNKNOWN';
-            
-            if (riskLevel === 'LOW' && paymentConf > 0.8) {
-                return "Both payment and fraud agents agree this is a legitimate transaction with technical issues that can be resolved.";
-            } else if (riskLevel === 'MEDIUM') {
-                return "Payment agent identified technical issues while fraud agent flagged moderate risk - proceeding with enhanced verification.";
-            } else if (riskLevel === 'HIGH') {
-                return "Fraud agent detected high risk factors - payment processing halted pending additional verification.";
-            }
-        }
-        
-        return "Agents coordinated their analysis to provide comprehensive incident resolution.";
     }
 }
 

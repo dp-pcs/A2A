@@ -22,6 +22,7 @@
             max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
+            padding-bottom: 80px;
         }
 
         .header {
@@ -344,31 +345,6 @@
             grid-column: 1 / -1;
         }
 
-        .api-notice {
-            background: #fef5e7;
-            border: 2px solid #f6ad55;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-
-        .api-notice h4 {
-            color: #744210;
-            margin-bottom: 8px;
-        }
-
-        .api-notice p {
-            color: #744210;
-        }
-
-        .api-notice code {
-            background: #ed8936;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-weight: bold;
-        }
-
         /* Network Visualization Styles */
         .agent-nodes {
             display: flex;
@@ -552,22 +528,110 @@
             color: #e5e7eb;
             margin: 0;
         }
+
+        /* Demo Navigation Styles */
+        .demo-nav {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-bottom: 2px solid #4f46e5;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .demo-nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .demo-nav-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #f3f4f6;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .demo-nav-links {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .demo-nav-link {
+            color: #9ca3af;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .demo-nav-link:hover {
+            background: #374151;
+            color: #f3f4f6;
+        }
+
+        .demo-nav-link.active {
+            background: #4f46e5;
+            color: white;
+        }
+
+        .demo-nav-link.new {
+            position: relative;
+        }
+
+        .demo-nav-link.new::after {
+            content: 'NEW';
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #10b981;
+            color: white;
+            font-size: 0.6rem;
+            padding: 0.1rem 0.3rem;
+            border-radius: 0.25rem;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
+    <!-- Demo Navigation -->
+    <nav class="demo-nav">
+        <div class="demo-nav-container">
+            <a href="./" class="demo-nav-brand">
+                🔄 A2A Demo Suite
+            </a>
+            <div class="demo-nav-links">
+                <a href="smart-demo.html" class="demo-nav-link active">
+                    🧠 Smart A2A Demo
+                </a>
+                <a href="technical-demo.html" class="demo-nav-link">
+                    🔧 Technical Demo
+                </a>
+                <a href="hybrid-demo.html" class="demo-nav-link new">
+                    🌐 A2A + MCP Hybrid
+                </a>
+                <a href="./" class="demo-nav-link">
+                    🏠 Main Page
+                </a>
+            </div>
+        </div>
+    </nav>
+
     <div class="container">
         <div class="header">
             <h1>🧠 Smart A2A Demo</h1>
             <p class="subtitle">AI-Powered Agent-to-Agent Communication with Dynamic Reasoning</p>
-        </div>
-
-        <div class="api-notice">
-            <h4>🔑 LLM API Configuration Required</h4>
-            <p>
-                To see dynamic AI responses, set your API key:
-                <code>export ANTHROPIC_API_KEY=your_key_here</code> or <code>export OPENAI_API_KEY=your_key_here</code>
-                <br>Without API keys, agents will use fallback responses.
-            </p>
         </div>
 
         <div class="analysis-notice" id="analysis-notice">

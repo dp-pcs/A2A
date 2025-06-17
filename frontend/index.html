@@ -20,6 +20,7 @@
             align-items: center;
             justify-content: center;
             padding: 2rem;
+            padding-top: 80px;
         }
 
         .demo-grid {
@@ -147,18 +148,133 @@
                 font-size: 2rem;
             }
         }
+
+        /* Demo Navigation Styles */
+        .demo-nav {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-bottom: 2px solid #4f46e5;
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .demo-nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .demo-nav-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #f3f4f6;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .demo-nav-links {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .demo-nav-link {
+            color: #9ca3af;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .demo-nav-link:hover {
+            background: #374151;
+            color: #f3f4f6;
+        }
+
+        .demo-nav-link.active {
+            background: #4f46e5;
+            color: white;
+        }
+
+        .demo-nav-link.new {
+            position: relative;
+        }
+
+        .demo-nav-link.new::after {
+            content: 'NEW';
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #10b981;
+            color: white;
+            font-size: 0.6rem;
+            padding: 0.1rem 0.3rem;
+            border-radius: 0.25rem;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
+    <!-- Demo Navigation -->
+    <nav class="demo-nav">
+        <div class="demo-nav-container">
+            <a href="./" class="demo-nav-brand">
+                🔄 A2A Demo Suite
+            </a>
+            <div class="demo-nav-links">
+                <a href="smart-demo.html" class="demo-nav-link">
+                    🧠 Smart A2A Demo
+                </a>
+                <a href="technical-demo.html" class="demo-nav-link">
+                    🔧 Technical Demo
+                </a>
+                <a href="hybrid-demo.html" class="demo-nav-link new">
+                    🌐 A2A + MCP Hybrid
+                </a>
+                <a href="./" class="demo-nav-link active">
+                    🏠 Main Page
+                </a>
+            </div>
+        </div>
+    </nav>
+
     <div class="demo-grid">
         <div class="header">
             <h1>A2A Protocol Demos</h1>
             <p>Explore Agent-to-Agent communication patterns with interactive demonstrations showing real protocol traffic and architectural patterns.</p>
         </div>
 
+        <a href="smart-demo.html" class="demo-card">
+            <div class="demo-icon">🧠</div>
+            <h2 class="demo-title">Smart A2A Demo</h2>
+            <p class="demo-description">
+                See the business value of agent coordination with AI-powered decision making and dynamic workflow orchestration.
+            </p>
+            <ul class="demo-features">
+                <li>Scenario-based business problems</li>
+                <li>AI agent reasoning and coordination</li>
+                <li>Real-time decision making</li>
+                <li>Customer-specific solutions</li>
+                <li>Business impact demonstration</li>
+            </ul>
+            <span class="demo-badge">Smart Agents</span>
+        </a>
+
         <a href="technical-demo.html" class="demo-card">
             <div class="demo-icon">🔄</div>
-            <h2 class="demo-title">Technical A2A Demo</h2>
+            <h2 class="demo-title">A2A Technical Demo</h2>
             <p class="demo-description">
                 See the complete A2A protocol in action with real-time HTTP traffic visualization, SSE streaming, and interactive tutorials.
             </p>
@@ -186,22 +302,6 @@
                 <li>Horizontal + vertical architecture</li>
             </ul>
             <span class="demo-badge new-badge">NEW: Hybrid Protocol</span>
-        </a>
-
-        <a href="smart-demo.html" class="demo-card">
-            <div class="demo-icon">🧠</div>
-            <h2 class="demo-title">Smart Agent Demo</h2>
-            <p class="demo-description">
-                Advanced agent coordination with LLM-powered decision making and dynamic workflow orchestration.
-            </p>
-            <ul class="demo-features">
-                <li>LLM-powered agents</li>
-                <li>Dynamic workflow generation</li>
-                <li>Advanced reasoning capabilities</li>
-                <li>Context-aware responses</li>
-                <li>Multi-step problem solving</li>
-            </ul>
-            <span class="demo-badge">Smart Agents</span>
         </a>
     </div>
 </body>

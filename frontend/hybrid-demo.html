@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A2A + MCP Hybrid Protocol Demo</title>
+    <title>A2A + MCP Hybrid Demo - Protocol Integration</title>
     <style>
         * {
             margin: 0;
@@ -25,6 +25,9 @@
             height: 100vh;
             gap: 1px;
             background: #1f2937;
+            padding-bottom: 80px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #e2e8f0;
         }
 
         .panel {
@@ -348,9 +351,106 @@
         .status-idle {
             background: #6b7280;
         }
+
+        /* Demo Navigation Styles */
+        .demo-nav {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-bottom: 2px solid #4f46e5;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .demo-nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .demo-nav-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #f3f4f6;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .demo-nav-links {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .demo-nav-link {
+            color: #9ca3af;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .demo-nav-link:hover {
+            background: #374151;
+            color: #f3f4f6;
+        }
+
+        .demo-nav-link.active {
+            background: #4f46e5;
+            color: white;
+        }
+
+        .demo-nav-link.new {
+            position: relative;
+        }
+
+        .demo-nav-link.new::after {
+            content: 'NEW';
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #10b981;
+            color: white;
+            font-size: 0.6rem;
+            padding: 0.1rem 0.3rem;
+            border-radius: 0.25rem;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
+    <!-- Demo Navigation -->
+    <nav class="demo-nav">
+        <div class="demo-nav-container">
+            <a href="./" class="demo-nav-brand">
+                🔄 A2A Demo Suite
+            </a>
+            <div class="demo-nav-links">
+                <a href="smart-demo.html" class="demo-nav-link">
+                    🧠 Smart A2A Demo
+                </a>
+                <a href="technical-demo.html" class="demo-nav-link">
+                    🔧 Technical Demo
+                </a>
+                <a href="hybrid-demo.html" class="demo-nav-link active new">
+                    🌐 A2A + MCP Hybrid
+                </a>
+                <a href="./" class="demo-nav-link">
+                    🏠 Main Page
+                </a>
+            </div>
+        </div>
+    </nav>
+
     <div class="demo-container">
         <!-- Control Panel -->
         <div class="panel">
@@ -1261,9 +1361,371 @@
             }
 
             async runResearchOrchestrationDemo() {
-                // Alternative scenario - could implement different flow
-                this.logToBoth('🔬 Research Orchestration Demo', 
-                    'Coming soon - complex research with agent coordination + knowledge access');
+                // Step 1: Intro
+                await this.executeTutorialStep(() => {
+                    this.logToBoth('🎬 Starting Research Assistant Orchestration Demo', 
+                        'A2A agents coordinate to conduct comprehensive research using multiple MCP knowledge sources');
+                });
+
+                // Step 2: Research Question Received
+                await this.executeTutorialStep(async () => {
+                    await this.receiveResearchQuestion();
+                });
+
+                // Step 3: Agent Discovery for Research
+                await this.executeTutorialStep(async () => {
+                    await this.discoverResearchAgentsAndTools();
+                });
+
+                // Step 4: Research Strategy Formation
+                await this.executeTutorialStep(async () => {
+                    await this.formulateResearchStrategy();
+                });
+
+                // Step 5: Parallel Research Execution
+                await this.executeTutorialStep(async () => {
+                    await this.executeParallelResearch();
+                });
+
+                // Step 6: Knowledge Synthesis
+                await this.executeTutorialStep(() => {
+                    this.synthesizeResearchFindings();
+                });
+
+                // Step 7: Final Research Report
+                await this.executeTutorialStep(async () => {
+                    await this.generateResearchReport();
+                });
+            }
+
+            async receiveResearchQuestion() {
+                this.currentIncident = `research-${Date.now()}`;
+                
+                const researchQuery = {
+                    question: "What are the current trends and best practices in AI agent coordination protocols, specifically comparing A2A and MCP approaches?",
+                    scope: "comprehensive_analysis",
+                    depth: "technical_and_strategic",
+                    sources: ["academic", "industry", "case_studies"],
+                    deadline: "urgent_priority"
+                };
+
+                if (this.tutorialMode) {
+                    this.logA2A('RESEARCH_REQUEST', 
+                        '📋 Complex Research Question Received',
+                        'User needs comprehensive analysis of AI agent coordination protocols. This requires coordinated research across multiple knowledge domains...');
+                        
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                }
+
+                this.a2aRequestCount++;
+                this.updateMetrics();
+                
+                this.logA2A('POST /research/orchestrate', 
+                    '💡 A2A Research Task: Complex research question submitted for coordinated investigation',
+                    `Research orchestrator will coordinate multiple specialist agents to gather, analyze, and synthesize information from diverse knowledge sources.`,
+                    researchQuery);
+            }
+
+            async discoverResearchAgentsAndTools() {
+                this.setA2AStatus(true);
+                this.setMCPStatus(true);
+                
+                if (this.tutorialMode) {
+                    this.logA2A('GET /research-agents', 
+                        '🔍 A2A Discovery: Finding research specialist agents',
+                        'Research orchestrator scanning for available research specialists: analysis agents, synthesis agents, domain experts...');
+                        
+                    this.logMCP('tools/research_discovery', 
+                        '📚 MCP Tool Discovery: Research knowledge sources',
+                        'MCP servers advertising research tools: academic databases, industry reports, case study repositories...');
+                        
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                }
+
+                // Mock research agents discovery
+                this.activeAgents = 4;
+                this.updateMetrics();
+                
+                const researchAgents = {
+                    agents: [
+                        { agent_id: 'research-coordinator-001', specialization: 'Research planning and coordination' },
+                        { agent_id: 'academic-analyst-001', specialization: 'Academic literature analysis' },
+                        { agent_id: 'industry-scout-001', specialization: 'Industry trends and case studies' },
+                        { agent_id: 'synthesis-agent-001', specialization: 'Knowledge synthesis and reporting' }
+                    ]
+                };
+                
+                this.logA2A('GET /research-agents', 
+                    '💡 A2A Agent Discovery: Found research specialist team',
+                    `Registry returned: ${researchAgents.agents.map(a => a.agent_id).join(', ')}. Perfect team for comprehensive research coordination.`,
+                    researchAgents);
+
+                // MCP research tools discovery
+                this.mcpRequestCount++;
+                this.knowledgeSources = 4;
+                this.updateMetrics();
+                
+                const researchTools = {
+                    tools: [
+                        { name: 'trilogy_articles', description: 'Trilogy AI Center of Excellence - Latest AI protocols and frameworks' },
+                        { name: 'academic_search', description: 'Academic paper database - peer-reviewed research' },
+                        { name: 'industry_reports', description: 'Industry analysis and trend reports' },
+                        { name: 'case_studies', description: 'Real-world implementation case studies' }
+                    ]
+                };
+                
+                this.logMCP('tools/research_discovery', 
+                    '💡 MCP Research Tools: Knowledge source inventory complete',
+                    `Research tools available: ${researchTools.tools.map(t => t.name).join(', ')}. Agents can access diverse knowledge repositories.`,
+                    researchTools);
+            }
+
+            async formulateResearchStrategy() {
+                if (this.tutorialMode) {
+                    this.logA2A('STRATEGY_PLANNING', 
+                        '🧠 Research Coordinator formulating investigation strategy',
+                        'Research Coordinator: "This question requires multi-faceted analysis. I\'ll delegate specialized research tasks to domain experts..."');
+                        
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                }
+
+                const researchPlan = {
+                    strategy: "multi_agent_parallel_research",
+                    domains: ["technical_protocols", "industry_adoption", "academic_research", "case_studies"],
+                    coordination_method: "a2a_orchestration",
+                    knowledge_access: "mcp_integration",
+                    synthesis_approach: "collaborative_analysis"
+                };
+
+                this.a2aRequestCount++;
+                this.updateMetrics();
+                
+                this.logA2A('RESEARCH_STRATEGY', 
+                    '💡 A2A Research Strategy: Multi-agent parallel investigation plan',
+                    'Coordinator will delegate specialized research tasks: Academic Analyst → literature review, Industry Scout → trend analysis, Synthesis Agent → final integration.',
+                    researchPlan);
+
+                // Show agent task delegation
+                const tasks = [
+                    { agent: 'Academic Analyst', domain: 'academic_literature', focus: 'A2A and MCP protocol research papers' },
+                    { agent: 'Industry Scout', domain: 'industry_trends', focus: 'Real-world adoption and implementation patterns' },
+                    { agent: 'Synthesis Agent', domain: 'knowledge_integration', focus: 'Comparative analysis and best practices' }
+                ];
+
+                for (const task of tasks) {
+                    this.a2aRequestCount++;
+                    this.updateMetrics();
+                    
+                    this.logA2A(`JSON-RPC: research_${task.domain}`, 
+                        `💡 A2A Task Delegation: ${task.agent} research assignment`,
+                        `Agent will investigate ${task.focus} using available MCP knowledge sources.`,
+                        { task_domain: task.domain, research_focus: task.focus, status: 'assigned' });
+                    
+                    if (!this.tutorialMode) {
+                        await new Promise(resolve => setTimeout(resolve, 300));
+                    }
+                }
+            }
+
+            async executeParallelResearch() {
+                if (this.tutorialMode) {
+                    this.logA2A('PARALLEL_RESEARCH', 
+                        '🔍 All research agents beginning parallel investigation',
+                        'Agents are simultaneously querying different knowledge sources to gather comprehensive research data...');
+                        
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+
+                // Academic research via MCP
+                await this.performAcademicResearch();
+                
+                // Industry research via MCP
+                await this.performIndustryResearch();
+                
+                // Case study research via MCP
+                await this.performCaseStudyResearch();
+            }
+
+            async performAcademicResearch() {
+                this.logA2A('MCP_INVOCATION', 
+                    '🔧 Academic Analyst invoking MCP research tools',
+                    'Academic Analyst: "Searching academic databases for A2A and MCP protocol research. Invoking academic_search tool..."');
+
+                this.mcpRequestCount++;
+                this.updateMetrics();
+                
+                this.logMCP('academic_search/invoke', 
+                    '💡 MCP Tool Invocation: Academic database search',
+                    'Query: "Agent-to-Agent communication protocols, Model Context Protocol, AI system integration", Sources: IEEE, ACM, arXiv',
+                    { tool: 'academic_search', query: 'A2A protocols MCP agent coordination', databases: ['IEEE', 'ACM', 'arXiv'] });
+
+                if (!this.tutorialMode) {
+                    await new Promise(resolve => setTimeout(resolve, 800));
+                }
+
+                const academicFindings = {
+                    papers_found: 23,
+                    key_findings: [
+                        "A2A protocols show 40% improvement in multi-agent task coordination",
+                        "MCP adoption growing 300% year-over-year in enterprise AI systems",
+                        "Hybrid A2A+MCP architectures demonstrate superior scalability"
+                    ],
+                    top_papers: [
+                        { title: "Standardized Agent Communication in Distributed AI Systems", citations: 156 },
+                        { title: "Model Context Protocol: Bridging AI and External Systems", citations: 89 }
+                    ]
+                };
+
+                this.mcpRequestCount++;
+                this.updateMetrics();
+                
+                this.logMCP('academic_search/response', 
+                    '💡 MCP Tool Response: Academic research completed',
+                    `Found ${academicFindings.papers_found} relevant academic papers with key insights on protocol effectiveness`,
+                    academicFindings);
+            }
+
+            async performIndustryResearch() {
+                this.logA2A('MCP_INVOCATION', 
+                    '🔧 Industry Scout accessing industry trend data',
+                    'Industry Scout: "Analyzing market adoption patterns and implementation trends. Invoking industry_reports tool..."');
+
+                this.mcpRequestCount++;
+                this.updateMetrics();
+                
+                this.logMCP('industry_reports/invoke', 
+                    '💡 MCP Tool Invocation: Industry trend analysis',
+                    'Query: "AI agent coordination market trends, enterprise adoption rates, implementation challenges"',
+                    { tool: 'industry_reports', focus: 'agent_coordination_trends', timeframe: 'last_24_months' });
+
+                if (!this.tutorialMode) {
+                    await new Promise(resolve => setTimeout(resolve, 600));
+                }
+
+                const industryFindings = {
+                    market_growth: "127% increase in enterprise AI agent deployments",
+                    top_adopters: ["Financial Services", "Healthcare", "Manufacturing"],
+                    implementation_patterns: [
+                        "Hybrid A2A+MCP architectures preferred by 78% of enterprises",
+                        "Average 6-month deployment timeline for full coordination systems",
+                        "ROI typically achieved within 8-12 months"
+                    ]
+                };
+
+                this.mcpRequestCount++;
+                this.updateMetrics();
+                
+                this.logMCP('industry_reports/response', 
+                    '💡 MCP Tool Response: Industry analysis completed',
+                    'Market data shows strong adoption trends with clear preference for hybrid protocol approaches',
+                    industryFindings);
+            }
+
+            async performCaseStudyResearch() {
+                this.logA2A('MCP_INVOCATION', 
+                    '🔧 Synthesis Agent gathering real-world implementation cases',
+                    'Synthesis Agent: "Need concrete examples of successful deployments. Querying case study repository..."');
+
+                this.mcpRequestCount++;
+                this.updateMetrics();
+                
+                this.logMCP('case_studies/invoke', 
+                    '💡 MCP Tool Invocation: Case study analysis',
+                    'Query: "A2A protocol implementations, MCP success stories, agent coordination case studies"',
+                    { tool: 'case_studies', filter: 'successful_implementations', industry: 'all' });
+
+                if (!this.tutorialMode) {
+                    await new Promise(resolve => setTimeout(resolve, 700));
+                }
+
+                const caseStudyFindings = {
+                    cases_analyzed: 15,
+                    success_stories: [
+                        {
+                            company: "TechCorp Financial",
+                            implementation: "A2A fraud detection coordination",
+                            results: "65% faster fraud resolution, 40% reduction in false positives"
+                        },
+                        {
+                            company: "HealthSystem Plus",
+                            implementation: "MCP diagnostic tool integration",
+                            results: "30% faster diagnosis, improved accuracy through external knowledge access"
+                        }
+                    ],
+                    best_practices: [
+                        "Start with pilot program in single domain",
+                        "Invest in agent skill standardization",
+                        "Implement comprehensive monitoring from day one"
+                    ]
+                };
+
+                this.mcpRequestCount++;
+                this.updateMetrics();
+                
+                this.logMCP('case_studies/response', 
+                    '💡 MCP Tool Response: Case study analysis completed',
+                    `Analyzed ${caseStudyFindings.cases_analyzed} successful implementations with measurable business outcomes`,
+                    caseStudyFindings);
+            }
+
+            synthesizeResearchFindings() {
+                this.logA2A('KNOWLEDGE_SYNTHESIS', 
+                    '🧩 Synthesis Agent integrating research findings',
+                    'Synthesis Agent: "Combining academic research, industry trends, and case studies into comprehensive analysis..."');
+
+                if (this.tutorialMode) {
+                    setTimeout(() => {
+                        this.logA2A('PATTERN_ANALYSIS', 
+                            '🎯 Cross-domain patterns identified',
+                            'Synthesis Agent: "Clear consensus emerging: A2A excels at horizontal coordination, MCP provides vertical integration. Hybrid approaches show superior results."');
+                    }, 1000);
+                } else {
+                    this.logA2A('SYNTHESIS', 
+                        '🔗 Research synthesis: Multi-source knowledge integration complete',
+                        'All research streams converge on hybrid A2A+MCP architecture advantages with strong empirical support from academic and industry sources.');
+                }
+            }
+
+            async generateResearchReport() {
+                if (this.tutorialMode) {
+                    this.logA2A('REPORT_GENERATION', 
+                        '📝 Generating comprehensive research report',
+                        'Synthesis Agent: "Compiling final research report with executive summary, technical analysis, and strategic recommendations..."');
+                        
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                }
+
+                const researchReport = {
+                    title: "AI Agent Coordination Protocols: A2A vs MCP Comparative Analysis",
+                    executive_summary: "Hybrid A2A+MCP architectures demonstrate superior performance in enterprise deployments",
+                    key_findings: [
+                        "A2A protocols optimize horizontal agent-to-agent coordination with 40% efficiency gains",
+                        "MCP provides essential vertical integration for external knowledge access",
+                        "Hybrid implementations show 60% better scalability than single-protocol approaches"
+                    ],
+                    recommendations: [
+                        "Implement A2A for agent coordination workflows",
+                        "Use MCP for external system and knowledge base integration",
+                        "Plan hybrid architecture from project inception"
+                    ],
+                    confidence_score: 0.94,
+                    sources_analyzed: 42,
+                    research_domains: 4
+                };
+
+                this.logA2A('SSE: research_completed', 
+                    '💡 A2A Research Complete: Comprehensive analysis delivered',
+                    `Research confidence: ${(researchReport.confidence_score * 100).toFixed(1)}%. Analysis based on ${researchReport.sources_analyzed} sources across ${researchReport.research_domains} domains.`,
+                    researchReport);
+
+                this.logToBoth('🎯 Research Orchestration Successfully Completed',
+                    'A2A agent coordination enhanced with comprehensive MCP knowledge access delivered actionable insights');
+
+                this.setA2AStatus(false);
+                this.setMCPStatus(false);
+
+                // Gracefully conclude tutorial mode
+                this.concludeTutorial();
             }
         }
 

@@ -152,32 +152,58 @@
         /* Demo Navigation Styles */
         .demo-nav {
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            border-bottom: 2px solid #4f46e5;
+            border-bottom: 3px solid transparent;
+            border-image: linear-gradient(90deg, #4f46e5, #7c3aed, #ec4899) 1;
             padding: 1rem 0;
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 1000;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
         .demo-nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
+            max-width: none;
+            margin: 0;
+            padding: 0 2rem 0 0;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
+            gap: 2rem;
         }
 
         .demo-nav-brand {
-            font-size: 1.5rem;
+            font-size: 1.75rem;
             font-weight: 700;
             color: #f3f4f6;
             text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 1.25rem;
+            transition: all 0.3s ease;
+            padding: 0.5rem 0.5rem 0.5rem 1rem;
+            border-radius: 20px;
+        }
+
+        .demo-nav-brand:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-1px);
+        }
+
+        .nav-logo {
+            height: 116px;
+            width: auto;
+            max-width: none;
+            border-radius: 16px;
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 4px 12px rgba(124, 58, 237, 0.4));
+        }
+
+        .demo-nav-brand:hover .nav-logo {
+            transform: scale(1.05);
+            filter: drop-shadow(0 4px 12px rgba(124, 58, 237, 0.5));
         }
 
         .demo-nav-links {
@@ -224,6 +250,39 @@
             border-radius: 0.25rem;
             font-weight: 600;
         }
+
+        .brand-watermark {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(31, 41, 55, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 0.5rem 1rem;
+            border-radius: 12px;
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            z-index: 100;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .brand-watermark:hover {
+            opacity: 1;
+        }
+
+        .brand-watermark img {
+            height: 24px;
+            width: auto;
+            border-radius: 5px;
+        }
+
+        .brand-watermark-text {
+            font-size: 0.8rem;
+            color: #9ca3af;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -231,7 +290,8 @@
     <nav class="demo-nav">
         <div class="demo-nav-container">
             <a href="./" class="demo-nav-brand">
-                🔄 A2A Demo Suite
+                <img src="lg_logo_colorful.png" alt="Latent Genius" class="nav-logo">
+                A2A Demo Suite
             </a>
             <div class="demo-nav-links">
                 <a href="smart-demo.html" class="demo-nav-link">
@@ -244,7 +304,7 @@
                     🌐 A2A + MCP Hybrid
                 </a>
                 <a href="./" class="demo-nav-link active">
-                    🏠 Main Page
+                    🚀 Main Page
                 </a>
             </div>
         </div>
@@ -303,6 +363,12 @@
             </ul>
             <span class="demo-badge new-badge">NEW: Hybrid Protocol</span>
         </a>
+    </div>
+
+    <!-- Brand Watermark -->
+    <div class="brand-watermark">
+        <img src="lg_logo_colorful.png" alt="Latent Genius">
+        <span class="brand-watermark-text">Powered by Latent Genius</span>
     </div>
 </body>
 </html> 

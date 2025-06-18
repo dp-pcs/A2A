@@ -379,30 +379,56 @@
         /* Demo Navigation Styles */
         .demo-nav {
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            border-bottom: 2px solid #4f46e5;
+            border-bottom: 3px solid transparent;
+            border-image: linear-gradient(90deg, #4f46e5, #7c3aed, #ec4899) 1;
             padding: 1rem 0;
             position: sticky;
             top: 0;
             z-index: 1000;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
         .demo-nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
+            max-width: none;
+            margin: 0;
+            padding: 0 2rem 0 0;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
+            gap: 2rem;
         }
 
         .demo-nav-brand {
-            font-size: 1.5rem;
+            font-size: 1.75rem;
             font-weight: 700;
             color: #f3f4f6;
             text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 1.25rem;
+            transition: all 0.3s ease;
+            padding: 0.5rem 0.5rem 0.5rem 1rem;
+            border-radius: 20px;
+        }
+
+        .demo-nav-brand:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-1px);
+        }
+
+        .nav-logo {
+            height: 116px;
+            width: auto;
+            max-width: none;
+            border-radius: 16px;
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 4px 12px rgba(124, 58, 237, 0.4));
+        }
+
+        .demo-nav-brand:hover .nav-logo {
+            transform: scale(1.05);
+            filter: drop-shadow(0 4px 12px rgba(124, 58, 237, 0.5));
         }
 
         .demo-nav-links {
@@ -456,7 +482,8 @@
     <nav class="demo-nav">
         <div class="demo-nav-container">
             <a href="./" class="demo-nav-brand">
-                🔄 A2A Demo Suite
+                <img src="lg_logo_colorful.png" alt="Latent Genius" class="nav-logo">
+                A2A Demo Suite
             </a>
             <div class="demo-nav-links">
                 <a href="smart-demo.html" class="demo-nav-link">
@@ -469,7 +496,7 @@
                     🌐 A2A + MCP Hybrid
                 </a>
                 <a href="./" class="demo-nav-link">
-                    🏠 Main Page
+                    🚀 Main Page
                 </a>
             </div>
         </div>

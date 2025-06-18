@@ -28,6 +28,7 @@
             padding-bottom: 80px;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             color: #e2e8f0;
+            position: relative;
         }
 
         .panel {
@@ -50,6 +51,10 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .panel-subtitle {
@@ -78,9 +83,10 @@
         }
 
         .scenario-card.selected {
-            border-color: #4f46e5;
-            background: #252d3f;
-            box-shadow: 0 0 0 1px #4f46e5;
+            border: 2px solid transparent;
+            background: linear-gradient(#252d3f, #252d3f) padding-box,
+                       linear-gradient(135deg, #4f46e5, #7c3aed, #ec4899) border-box;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.2);
         }
 
         .scenario-title {
@@ -119,26 +125,216 @@
         }
 
         .run-button {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%);
             color: white;
             border: none;
             padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
+            border-radius: 0.75rem;
             font-weight: 600;
             cursor: pointer;
             width: 100%;
             margin-bottom: 1rem;
-            transition: transform 0.2s ease;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
         }
 
         .run-button:hover {
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
         }
 
         .run-button:disabled {
             background: #374151;
             cursor: not-allowed;
             transform: none;
+        }
+
+        .behind-scenes-toggle {
+            background: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #ec4899 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
+        }
+
+        .behind-scenes-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(168, 85, 247, 0.4);
+        }
+
+        .behind-scenes-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .behind-scenes-modal.show {
+            display: flex;
+        }
+
+        .behind-scenes-content {
+            background: #111827;
+            border: 1px solid #374151;
+            border-radius: 0.75rem;
+            width: 90%;
+            max-width: 1000px;
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .behind-scenes-header {
+            background: #1f2937;
+            padding: 1.5rem;
+            border-bottom: 1px solid #374151;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .behind-scenes-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #f3f4f6;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .behind-scenes-close {
+            background: #374151;
+            color: #9ca3af;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-size: 1.25rem;
+            transition: all 0.2s ease;
+        }
+
+        .behind-scenes-close:hover {
+            background: #4b5563;
+            color: #f3f4f6;
+        }
+
+        .behind-scenes-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .coordination-example {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .coordination-title {
+            font-weight: 600;
+            color: #f1f5f9;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .coordination-description {
+            color: #94a3b8;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .message-flow {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 0.375rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .message-flow-title {
+            color: #fbbf24;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .message-payload {
+            background: rgba(0, 0, 0, 0.5);
+            border-left: 3px solid #8b5cf6;
+            padding: 0.75rem;
+            border-radius: 0.25rem;
+            font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+            font-size: 0.8rem;
+            color: #e5e7eb;
+            white-space: pre-wrap;
+            line-height: 1.4;
+        }
+
+        .real-world-note {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .real-world-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .brand-watermark {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(31, 41, 55, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 0.5rem 1rem;
+            border-radius: 12px;
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            z-index: 100;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .brand-watermark:hover {
+            opacity: 1;
+        }
+
+        .brand-watermark img {
+            height: 24px;
+            width: auto;
+            border-radius: 5px;
+        }
+
+        .brand-watermark-text {
+            font-size: 0.8rem;
+            color: #9ca3af;
+            font-weight: 500;
         }
 
         .tutorial-controls {
@@ -219,6 +415,17 @@
         .sse-entry {
             background: #1a0f1f;
             border-left-color: #8b5cf6;
+        }
+
+        .behind-scenes-entry {
+            background: #1a0d1f;
+            border-left-color: #a855f7;
+            border: 1px solid rgba(168, 85, 247, 0.2);
+        }
+
+        .behind-scenes-entry .log-explanation {
+            color: #c084fc;
+            font-weight: 600;
         }
 
         .log-header {
@@ -355,30 +562,56 @@
         /* Demo Navigation Styles */
         .demo-nav {
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            border-bottom: 2px solid #4f46e5;
+            border-bottom: 3px solid transparent;
+            border-image: linear-gradient(90deg, #4f46e5, #7c3aed, #ec4899) 1;
             padding: 1rem 0;
             position: sticky;
             top: 0;
             z-index: 1000;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
         .demo-nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
+            max-width: none;
+            margin: 0;
+            padding: 0 2rem 0 0;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
+            gap: 2rem;
         }
 
         .demo-nav-brand {
-            font-size: 1.5rem;
+            font-size: 1.75rem;
             font-weight: 700;
             color: #f3f4f6;
             text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 1.25rem;
+            transition: all 0.3s ease;
+            padding: 0.5rem 0.5rem 0.5rem 1rem;
+            border-radius: 20px;
+        }
+
+        .demo-nav-brand:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-1px);
+        }
+
+        .nav-logo {
+            height: 116px;
+            width: auto;
+            max-width: none;
+            border-radius: 16px;
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 4px 12px rgba(124, 58, 237, 0.4));
+        }
+
+        .demo-nav-brand:hover .nav-logo {
+            transform: scale(1.05);
+            filter: drop-shadow(0 4px 12px rgba(124, 58, 237, 0.5));
         }
 
         .demo-nav-links {
@@ -432,7 +665,8 @@
     <nav class="demo-nav">
         <div class="demo-nav-container">
             <a href="./" class="demo-nav-brand">
-                🔄 A2A Demo Suite
+                <img src="lg_logo_colorful.png" alt="Latent Genius" class="nav-logo">
+                A2A Demo Suite
             </a>
             <div class="demo-nav-links">
                 <a href="smart-demo.html" class="demo-nav-link">
@@ -445,7 +679,7 @@
                     🌐 A2A + MCP Hybrid
                 </a>
                 <a href="./" class="demo-nav-link">
-                    🏠 Main Page
+                    🚀 Main Page
                 </a>
             </div>
         </div>
@@ -459,7 +693,7 @@
                     🎮 Hybrid Protocol Demo
                 </div>
                 <div class="panel-subtitle">
-                    Experience the architectural symphony of A2A (horizontal agent coordination) and MCP (vertical tool access) working together.
+                    Experience the architectural symphony of A2A (horizontal agent coordination) and MCP (vertical tool access) working together. Click "Behind the Scenes" to see the real coordination happening under the hood!
                 </div>
             </div>
             <div class="controls-panel">
@@ -487,6 +721,11 @@
 
                 <button class="run-button" id="runDemo">
                     🚀 Start Hybrid Demo
+                </button>
+
+                <!-- NEW: Behind the Scenes Toggle -->
+                <button class="behind-scenes-toggle" id="behindScenesToggle">
+                    🔍 Behind the Scenes
                 </button>
 
                 <div class="tutorial-controls">
@@ -572,6 +811,185 @@
 
     <div class="floating-tutorial" id="floatingTutorial">
         Next Protocol Step →
+    </div>
+
+    <!-- Brand Watermark -->
+    <div class="brand-watermark">
+        <img src="lg_logo_colorful.png" alt="Latent Genius">
+        <span class="brand-watermark-text">Powered by Latent Genius</span>
+    </div>
+
+    <!-- Behind the Scenes Modal -->
+    <div class="behind-scenes-modal" id="behindScenesModal">
+        <div class="behind-scenes-content">
+            <div class="behind-scenes-header">
+                <div class="behind-scenes-title">
+                    🔍 Behind the Scenes: Real A2A + MCP Coordination
+                </div>
+                <button class="behind-scenes-close" id="behindScenesClose">×</button>
+            </div>
+            <div class="behind-scenes-body">
+                <div class="coordination-example">
+                    <div class="coordination-title">
+                        🎯 What You See vs. What Really Happens
+                    </div>
+                    <div class="coordination-description">
+                        The demo shows agents conversing and then discovering they need MCP tools, but in reality, <strong>every A2A message exchange includes MCP capability information</strong>. The orchestrator continuously manages and exchanges MCP server capabilities with each message.
+                    </div>
+                </div>
+
+                <div class="coordination-example">
+                    <div class="coordination-title">
+                        📡 Real Message Flow: A2A Agent Coordination
+                    </div>
+                    <div class="coordination-description">
+                        When the orchestrator sends a task to an agent, it includes ALL available MCP server capabilities. The agent can then decide which tools to invoke without additional discovery.
+                    </div>
+                    
+                    <div class="message-flow">
+                        <div class="message-flow-title">Orchestrator → Agent A2A Message (JSON-RPC 2.0)</div>
+                        <div class="message-payload">{
+  "jsonrpc": "2.0",
+  "method": "execute_task",
+  "params": {
+    "task": {
+      "task_id": "ai-crisis-001",
+      "type": "mcp-diagnostics",
+      "priority": "critical",
+      "description": "Diagnose MCP integration failures"
+    },
+    "context": {
+      "incident_id": "incident-20241201-001",
+      "deadline": "2024-12-01T15:30:00Z"
+    },
+    "mcp_capabilities": {
+      "available_servers": [
+        {
+          "name": "trilogy_ai_server",
+          "version": "1.0.0",
+          "tools": [
+            {
+              "name": "search_articles",
+              "description": "Search Trilogy AI knowledge base",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "query": {"type": "string"},
+                  "max_results": {"type": "number"}
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "system_diagnostics_server", 
+          "version": "1.2.0",
+          "tools": [
+            {
+              "name": "check_mcp_health",
+              "description": "Check MCP server health status"
+            },
+            {
+              "name": "analyze_logs",
+              "description": "Analyze system logs for errors"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "id": "task-001"
+}</div>
+                    </div>
+                </div>
+
+                <div class="coordination-example">
+                    <div class="coordination-title">
+                        🔧 Real Message Flow: Agent MCP Tool Invocation
+                    </div>
+                    <div class="coordination-description">
+                        When the agent decides to use an MCP tool, it sends the request back through the orchestrator, which manages the actual MCP server communication.
+                    </div>
+                    
+                    <div class="message-flow">
+                        <div class="message-flow-title">Agent → Orchestrator Tool Request</div>
+                        <div class="message-payload">{
+  "jsonrpc": "2.0",
+  "method": "invoke_mcp_tool",
+  "params": {
+    "agent_id": "integration-agent-001",
+    "task_id": "ai-crisis-001",
+    "tool_request": {
+      "server": "trilogy_ai_server",
+      "tool": "search_articles",
+      "arguments": {
+        "query": "Model Context Protocol MCP integration failures",
+        "max_results": 5
+      }
+    },
+    "reasoning": "Need authoritative MCP documentation to resolve integration issues"
+  },
+  "id": "tool-req-001"
+}</div>
+                    </div>
+
+                    <div class="message-flow">
+                        <div class="message-flow-title">Orchestrator → Agent Tool Response</div>
+                        <div class="message-payload">{
+  "jsonrpc": "2.0",
+  "result": {
+    "tool_response": {
+      "status": "success",
+      "data": [
+        {
+          "title": "Standardizing AI-to-System Integration",
+          "author": "David Proctor",
+          "excerpt": "Model Context Protocol enables seamless integration...",
+          "url": "https://trilogyai.substack.com/p/standardizing-ai-to-system-integration"
+        }
+      ]
+    },
+    "execution_time": "234ms",
+    "server_used": "trilogy_ai_server"
+  },
+  "id": "tool-req-001"
+}</div>
+                    </div>
+                </div>
+
+                <div class="coordination-example">
+                    <div class="coordination-title">
+                        🌐 Real-World Example: IDE/Client with A2A + MCP
+                    </div>
+                    <div class="coordination-description">
+                        If an IDE/client supported A2A protocol and you had MCP servers configured, here's what would really happen when you ask a question:
+                    </div>
+                    
+                    <div class="message-flow">
+                        <div class="message-flow-title">User Question → Client's A2A Orchestration</div>
+                        <div class="message-payload">User: "Help me fix this MCP integration error"
+
+Client/IDE Orchestrator:
+1. Analyzes question complexity
+2. Discovers available A2A agents (coding assistant, debugging agent, etc.)
+3. Gathers ALL MCP server capabilities (your configured servers)
+4. Sends question + MCP capabilities to appropriate agents
+5. Agents can immediately invoke MCP tools without additional discovery
+6. Orchestrator coordinates responses and tool invocations
+7. Final answer synthesized from A2A coordination + MCP data</div>
+                    </div>
+                </div>
+
+                <div class="real-world-note">
+                    <div class="real-world-title">
+                        💡 Key Technical Insight
+                    </div>
+                    <div>
+                        The orchestrator/client is the "MCP capability broker" - it maintains awareness of all available MCP servers and their tools, then includes this information in every A2A message. This eliminates the need for agents to discover tools dynamically and enables immediate tool access when needed.
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -663,6 +1081,22 @@
 
                 document.getElementById('floatingTutorial').addEventListener('click', () => {
                     this.nextTutorialStep();
+                });
+
+                // Behind the Scenes modal
+                document.getElementById('behindScenesToggle').addEventListener('click', () => {
+                    this.showBehindScenes();
+                });
+
+                document.getElementById('behindScenesClose').addEventListener('click', () => {
+                    this.hideBehindScenes();
+                });
+
+                // Close modal when clicking outside
+                document.getElementById('behindScenesModal').addEventListener('click', (e) => {
+                    if (e.target.id === 'behindScenesModal') {
+                        this.hideBehindScenes();
+                    }
                 });
             }
 
@@ -887,6 +1321,9 @@
                     `💡 A2A Agent Card: ${agentId} capabilities confirmed`,
                     `Skills verified: ${mockCard.skills.map(s => s.name).join(', ')}. ${agentRoles[agentId]} ready for deployment.`,
                     mockCard);
+                
+                // Show behind-the-scenes MCP capability exchange
+                this.showMCPCapabilityExchange(agentId);
             }
 
             async createIncident() {
@@ -961,6 +1398,19 @@
                         `💡 A2A Task Delegation: ${task.agent} mission briefing complete`,
                         `Agent accepted ${task.task} investigation. ${task.mission}. Agent may require external knowledge sources to complete analysis.`,
                         { task_id: `${task.task}-${this.currentIncident}`, status: 'accepted', priority: 'critical' });
+                    
+                    // Show the MCP capabilities being included in the task message
+                    setTimeout(() => {
+                        this.logA2ABehindScenes(`MCP_CAPABILITIES → ${task.agent}`, 
+                            `🔍 Behind the scenes: Full MCP server manifest included in task message`,
+                            `The task delegation message automatically includes complete MCP server capabilities. ${task.agent} immediately knows about trilogy_ai_server, system_diagnostics_server, and technical_docs_server - no additional discovery needed.`,
+                            { 
+                                included_in_task_message: true,
+                                servers_count: 3,
+                                tools_count: 7,
+                                discovery_required: false 
+                            });
+                    }, 400);
                     
                     if (!this.tutorialMode) {
                         await new Promise(resolve => setTimeout(resolve, 200));
@@ -1247,6 +1697,27 @@
                 log.scrollTop = log.scrollHeight;
             }
 
+            logA2ABehindScenes(method, explanation, details, data = null) {
+                const log = document.getElementById('a2aLog');
+                const timestamp = new Date().toLocaleTimeString();
+                
+                const entry = document.createElement('div');
+                entry.className = 'log-entry a2a-entry behind-scenes-entry';
+                
+                entry.innerHTML = `
+                    <div class="log-header">
+                        <div class="log-method">${method}</div>
+                        <div class="log-timestamp">${timestamp}</div>
+                    </div>
+                    <div class="log-explanation">${explanation}</div>
+                    <div class="log-details">${details}</div>
+                    ${data ? `<div class="log-body">${JSON.stringify(data, null, 2)}</div>` : ''}
+                `;
+                
+                log.appendChild(entry);
+                log.scrollTop = log.scrollHeight;
+            }
+
             logMCP(method, explanation, details, data = null) {
                 const log = document.getElementById('mcpLog');
                 const timestamp = new Date().toLocaleTimeString();
@@ -1358,6 +1829,33 @@
             startTrafficMonitoring() {
                 // Could connect to real traffic streams here
                 console.log('Hybrid protocol demo initialized');
+            }
+
+            showBehindScenes() {
+                const modal = document.getElementById('behindScenesModal');
+                modal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
+
+            hideBehindScenes() {
+                const modal = document.getElementById('behindScenesModal');
+                modal.classList.remove('show');
+                document.body.style.overflow = 'auto';
+            }
+
+            showMCPCapabilityExchange(agentId) {
+                // Show the behind-the-scenes MCP capability sharing that happens with every A2A message
+                setTimeout(() => {
+                    this.logA2ABehindScenes(`MCP_CAPABILITIES → ${agentId}`, 
+                        `🔍 Behind the scenes: MCP server capabilities sent with agent card`,
+                        `Orchestrator automatically includes all MCP server capabilities (trilogy_ai_server, system_diagnostics_server, technical_docs_server) in every A2A message. Agent now knows what tools are available.`,
+                        {
+                            mcp_servers_included: 3,
+                            tools_available: 7,
+                            capability_exchange: "automatic",
+                            note: "This happens with EVERY A2A message - not just when tools are needed"
+                        });
+                }, 300);
             }
 
             async runResearchOrchestrationDemo() {
